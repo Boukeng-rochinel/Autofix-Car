@@ -41,7 +41,7 @@ exports.registerUser = async (req, res) => {
 
     // Optionally, you can also save some user profile data to Firestore here
     const db = require('../config/firebase'); // If you want to save to Firestore
-    await db.collection('users').doc(userRecord.uid).set({
+    await db.collection('usersProfile').doc(userRecord.uid).set({
       email: email,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       // Add other user profile fields here
@@ -161,7 +161,7 @@ exports.signInWithGoogle = async (req, res) => {
     // based on the Google user's information here.
     // Example: Check if user exists, if not, create them.
     const db = require('../config/firebase');
-    const userRef = db.collection('users').doc(uid);
+    const userRef = db.collection('usersProfile').doc(uid);
     const doc = await userRef.get();
     if (!doc.exists) {
       await userRef.set({
