@@ -2,6 +2,8 @@
 
 const db = require('../config/firebase'); // Import Firestore database instance
 const admin = require('firebase-admin'); // Import Firebase Admin SDK
+const path = require('path');
+const fs = require('fs');
 
 /**
  * Gets a user's profile data from Firestore.
@@ -30,6 +32,7 @@ exports.getUserProfile = async (req, res) => {
 /**
  * Creates or updates a user's profile data in Firestore.
  * User must be authenticated.
+ * Accepts multipart/form-data for image upload.
  * @param {object} req - Express request object (expects profile data in body).
  * @param {object} res - Express response object.
  */
@@ -38,18 +41,29 @@ exports.updateUserProfile = async (req, res) => {
     const userId = req.user.uid; // User ID from verified token
     const { name, contact, location, car_model } = req.body;
 
+    let imageUrl = req.body.imageUrl || '';
+    if (req.file) {
+      // Save the file and set the imageUrl
+      const ext = path.extname(req.file.originalname);
+      const fileName = `${userId}_${Date.now()}${ext}`;
+      const uploadPath = path.join(__dirname, '../uploads', fileName);
+      fs.writeFileSync(uploadPath, req.file.buffer);
+      imageUrl = `/uploads/${fileName}`;
+    }
+
     const updates = {
       name: name || '',
       contact: contact || '',
       location: location || '',
       car_model: car_model || '',
+      imageUrl: imageUrl|| '',
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
     // Use set with merge: true to create if not exists, or update if exists
     await db.collection('users').doc(userId).set(updates, { merge: true });
 
-    res.status(200).send({ message: 'User profile updated successfully!' });
+    res.status(200).send({ message: 'User profile updated successfully!', imageUrl });
   } catch (error) {
     console.error('Error updating user profile:', error);
     res.status(500).send({ message: 'Error updating user profile', error: error.message });
