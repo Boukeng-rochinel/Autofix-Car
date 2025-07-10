@@ -32,9 +32,15 @@ class ScanningResultPage extends StatefulWidget {
   State<ScanningResultPage> createState() => _ScanningResultPageState();
 }
 
-class _ScanningResultPageState extends State<ScanningResultPage> with TickerProviderStateMixin {
+class _ScanningResultPageState extends State<ScanningResultPage>
+    with TickerProviderStateMixin {
   List<ScanData> _previousScans = [];
   bool _isLoadingPreviousScans = true;
+
+  // Gemini icon detection state
+  Map<String, dynamic>? _geminiIconResult;
+  bool _isGeminiLoading = false;
+  String? _geminiError;
 
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -45,8 +51,30 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
     super.initState();
     _initializeAnimations();
     _loadPreviousScans();
+    _runGeminiIconDetection();
     // Potentially save the current scan result immediately if it's a new scan
     // However, saving to history is tied to the 'Download Report' button in your requirements.
+  }
+
+  void _runGeminiIconDetection() async {
+    if (widget.capturedImagePath != null && File(widget.capturedImagePath!).existsSync()) {
+      setState(() {
+        _isGeminiLoading = true;
+        _geminiError = null;
+      });
+      try {
+        final result = await ScanService.detectGeminiIcon(widget.capturedImagePath!);
+        setState(() {
+          _geminiIconResult = result;
+          _isGeminiLoading = false;
+        });
+      } catch (e) {
+        setState(() {
+          _geminiError = e.toString();
+          _isGeminiLoading = false;
+        });
+      }
+    }
   }
 
   void _initializeAnimations() {
@@ -55,21 +83,20 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.8, curve: Curves.easeOut),
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.8, curve: Curves.easeOut),
+      ),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.2),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
+          ),
+        );
 
     _animationController.forward();
   }
@@ -84,7 +111,9 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
       debugPrint('Error loading previous scans: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load previous scans: ${e.toString()}')),
+          SnackBar(
+            content: Text('Failed to load previous scans: ${e.toString()}'),
+          ),
         );
       }
     } finally {
@@ -121,14 +150,18 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
       final historyEntry = HistoryEntry(
         title: 'Diagnostic Scan: ${widget.currentScanResult!.title}',
         description: widget.currentScanResult!.description,
-        details: 'Status: ${widget.currentScanResult!.status.toString().split('.').last}\n'
+        details:
+            'Status: ${widget.currentScanResult!.status.toString().split('.').last}\n'
             'Scanned on: ${DateFormat('MMM dd, yyyy - hh:mm a').format(widget.currentScanResult!.scanDateTime)}\n'
             '${widget.currentScanResult!.metadata != null ? 'Metadata: ${widget.currentScanResult!.metadata}' : ''}',
         type: _mapScanStatusToHistoryType(widget.currentScanResult!.status),
         timestamp: widget.currentScanResult!.scanDateTime,
         severity: _mapScanStatusToSeverity(widget.currentScanResult!.status),
         // You might want to save the image path in metadata or a dedicated field in HistoryEntry
-        metadata: {'originalScanId': widget.currentScanResult!.id, 'capturedImagePath': widget.capturedImagePath},
+        metadata: {
+          'originalScanId': widget.currentScanResult!.id,
+          'capturedImagePath': widget.capturedImagePath,
+        },
       );
       await HistoryService.createHistoryEntry(historyEntry);
       debugPrint('Scan result saved to history.');
@@ -137,10 +170,12 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
       final notification = NotificationItem(
         userId: 'current_user_id', // Replace with actual authenticated user ID
         title: 'Scan Report Ready!',
-        message: 'Your diagnostic scan "${widget.currentScanResult!.title}" report is available.',
+        message:
+            'Your diagnostic scan "${widget.currentScanResult!.title}" report is available.',
         timestamp: DateTime.now(),
         type: 'report_download',
-        imageUrl: widget.capturedImagePath, // Use the captured image for notification if desired
+        imageUrl: widget
+            .capturedImagePath, // Use the captured image for notification if desired
         data: {
           'scanId': widget.currentScanResult!.id,
           'reportType': 'PDF',
@@ -151,7 +186,9 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
       debugPrint('Notification sent.');
 
       // 3. Simulate PDF Generation
-      await Future.delayed(const Duration(seconds: 2)); // Simulate PDF creation time
+      await Future.delayed(
+        const Duration(seconds: 2),
+      ); // Simulate PDF creation time
       debugPrint('PDF report simulated.');
 
       if (mounted) {
@@ -177,7 +214,8 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
     switch (status) {
       case ScanStatus.faultsDetected:
       case ScanStatus.needsAttention:
-        return HistoryType.engine; // Or a more specific 'diagnostic' type if available
+        return HistoryType
+            .engine; // Or a more specific 'diagnostic' type if available
       case ScanStatus.noFaults:
         return HistoryType.dashboard; // Successful dashboard scan
       case ScanStatus.pending:
@@ -220,11 +258,7 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1E40AF),
-              Color(0xFF3B82F6),
-              Color(0xFF60A5FA),
-            ],
+            colors: [Color(0xFF1E40AF), Color(0xFF3B82F6), Color(0xFF60A5FA)],
           ),
         ),
       ),
@@ -235,7 +269,11 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
           borderRadius: BorderRadius.circular(12),
         ),
         child: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.white,
+            size: 20,
+          ),
           onPressed: () {
             // Navigate back to the main navigation (e.g., home tab)
             Navigator.pushAndRemoveUntil(
@@ -344,14 +382,24 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
                     ),
                     if (widget.currentScanResult != null)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: widget.currentScanResult!.statusColor.withOpacity(0.15),
+                          color: widget.currentScanResult!.statusColor
+                              .withOpacity(0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          widget.currentScanResult!.status.toString().split('.').last.replaceAllMapped(
-                              RegExp(r'([A-Z])'), (match) => ' ${match.group(0)}'),
+                          widget.currentScanResult!.status
+                              .toString()
+                              .split('.')
+                              .last
+                              .replaceAllMapped(
+                                RegExp(r'([A-Z])'),
+                                (match) => ' ${match.group(0)}',
+                              ),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -374,26 +422,39 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.grey[300]!),
                         ),
-                        child: widget.capturedImagePath != null && File(widget.capturedImagePath!).existsSync()
+                        child:
+                            widget.capturedImagePath != null &&
+                                File(widget.capturedImagePath!).existsSync()
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: Image.file(
                                   File(widget.capturedImagePath!),
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
-                                      const Center(child: Icon(Icons.camera_alt, color: Colors.grey)),
+                                      const Center(
+                                        child: Icon(
+                                          Icons.camera_alt,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
                                 ),
                               )
-                            : const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
+                            : const Center(
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  color: Colors.grey,
+                                ),
+                              ),
                       ),
                       const SizedBox(width: 16),
-                      // Scan Result Details
+                      // Scan Result Details + Gemini Icon Detection
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.currentScanResult?.title ?? 'No Scan Performed',
+                              widget.currentScanResult?.title ??
+                                  'No Scan Performed',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -404,7 +465,8 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              widget.currentScanResult?.description ?? 'Run a scan to see results here.',
+                              widget.currentScanResult?.description ??
+                                  'Run a scan to see results here.',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey[600],
@@ -420,6 +482,28 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
                                   fontSize: 12,
                                   color: Colors.grey[500],
                                 ),
+                              ),
+                            // Gemini Icon Detection Result
+                            if (widget.capturedImagePath != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: _isGeminiLoading
+                                    ? Row(
+                                        children: const [
+                                          SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(strokeWidth: 2),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text('Detecting icons (Gemini)...', style: TextStyle(fontSize: 12, color: Colors.blueGrey)),
+                                        ],
+                                      )
+                                    : _geminiError != null
+                                        ? Text('Gemini error: $_geminiError', style: const TextStyle(fontSize: 12, color: Colors.red))
+                                        : _geminiIconResult != null && _geminiIconResult!['description'] != null
+                                            ? Text('Gemini Icon Detection: ${_geminiIconResult!['description']}', style: const TextStyle(fontSize: 12, color: Colors.deepPurple))
+                                            : const Text('No icon detected by Gemini.', style: TextStyle(fontSize: 12, color: Colors.grey)),
                               ),
                           ],
                         ),
@@ -445,7 +529,9 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
                 onPressed: () {
                   // TODO: Navigate to MechanicsPage
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Consult Mechanic (Not Implemented)')),
+                    const SnackBar(
+                      content: Text('Consult Mechanic (Not Implemented)'),
+                    ),
                   );
                 },
               ),
@@ -463,9 +549,11 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
                       onPressed: () {
                         // Navigate back to camera overlay scanner
                         Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const CameraOverlayScanner()));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CameraOverlayScanner(),
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -475,8 +563,12 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
                       context: context,
                       label: 'Download Report',
                       icon: Icons.download,
-                      backgroundColor: const Color(0xFF10B981), // Green for download
-                      onPressed: widget.currentScanResult != null ? _downloadReport : null, // Disable if no scan result
+                      backgroundColor: const Color(
+                        0xFF10B981,
+                      ), // Green for download
+                      onPressed: widget.currentScanResult != null
+                          ? _downloadReport
+                          : null, // Disable if no scan result
                     ),
                   ),
                 ],
@@ -508,20 +600,23 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
           child: _isLoadingPreviousScans
               ? _buildLoadingState()
               : _previousScans.isEmpty
-                  ? _buildEmptyState('No previous scans found. Run a diagnostic scan!')
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      itemCount: _previousScans.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: ScanItemCard(
-                            scan: _previousScans[index],
-                            onTap: () => _showScanDetailSheet(_previousScans[index]),
-                          ),
-                        );
-                      },
-                    ),
+              ? _buildEmptyState(
+                  'No previous scans found. Run a diagnostic scan!',
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  itemCount: _previousScans.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: ScanItemCard(
+                        scan: _previousScans[index],
+                        onTap: () =>
+                            _showScanDetailSheet(_previousScans[index]),
+                      ),
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -541,14 +636,20 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
       icon: Icon(icon, color: textColor),
       label: Text(
         label,
-        style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          color: textColor,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         minimumSize: const Size.fromHeight(55),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: borderColor != null ? BorderSide(color: borderColor, width: 1.5) : BorderSide.none,
+          side: borderColor != null
+              ? BorderSide(color: borderColor, width: 1.5)
+              : BorderSide.none,
         ),
         elevation: 3,
       ),
@@ -564,10 +665,7 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
           SizedBox(height: 16),
           Text(
             'Loading previous scans...',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey),
           ),
         ],
       ),
@@ -579,18 +677,11 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.history_toggle_off,
-            size: 48,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.history_toggle_off, size: 48, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             message,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
         ],
@@ -661,7 +752,9 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          DateFormat('MMM dd, yyyy - hh:mm a').format(scan.scanDateTime),
+                          DateFormat(
+                            'MMM dd, yyyy - hh:mm a',
+                          ).format(scan.scanDateTime),
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[600],
@@ -698,13 +791,18 @@ class _ScanningResultPageState extends State<ScanningResultPage> with TickerProv
                         ),
                       ),
                       const SizedBox(height: 8),
-                      ...scan.metadata!.entries.map((entry) => Padding(
-                            padding: const EdgeInsets.only(bottom: 4.0),
-                            child: Text(
-                              '${entry.key}: ${entry.value}',
-                              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                      ...scan.metadata!.entries.map(
+                        (entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Text(
+                            '${entry.key}: ${entry.value}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
                             ),
-                          )),
+                          ),
+                        ),
+                      ),
                     ],
                   ],
                 ),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/dashboard_header_copy.dart';
 import 'register_page.dart';
 import 'welcome_page.dart';
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart'; // Removed
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -13,8 +13,6 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
-
-
   void _handleNext() {
     // Navigate to main app with navbar
     Navigator.pushReplacement(
@@ -32,8 +30,7 @@ class _LandingPageState extends State<LandingPage> {
           children: [
             // Dashboard Header
             const DashboardHeader(),
-            
-           
+
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -50,33 +47,28 @@ class _LandingPageState extends State<LandingPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const SizedBox(height: 20),
-                      
+                      const SizedBox(height: 30),
+
                       // Title
-              
                       Center(
                         child: Text(
-                          'landing_subtitle'.tr(),
+                          'Choose your preferred language to continue', // Hardcoded
                           style: const TextStyle(
                             fontSize: 16,
                             color: Color(0xFF718096),
                           ),
                         ),
                       ),
-                      
-                      
-            
-                      
 
                       const SizedBox(height: 16),
-                      
+
                       // English
                       SizedBox(
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
                           onPressed: () async {
-                            await context.setLocale(const Locale('en'));
+                            // await context.setLocale(const Locale('en')); // Removed
                             _handleNext();
                           },
                           style: ElevatedButton.styleFrom(
@@ -86,9 +78,10 @@ class _LandingPageState extends State<LandingPage> {
                             ),
                             elevation: 0,
                           ),
-                          child: Text(
-                            'english'.tr(),
-                            style: const TextStyle(
+                          child: const Text(
+                            // Hardcoded
+                            'English',
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -103,7 +96,7 @@ class _LandingPageState extends State<LandingPage> {
                         height: 56,
                         child: ElevatedButton(
                           onPressed: () async {
-                            await context.setLocale(const Locale('fr'));
+                            // await context.setLocale(const Locale('fr')); // Removed
                             _handleNext();
                           },
                           style: ElevatedButton.styleFrom(
@@ -113,9 +106,10 @@ class _LandingPageState extends State<LandingPage> {
                             ),
                             elevation: 0,
                           ),
-                          child: Text(
-                            'french'.tr(),
-                            style: const TextStyle(
+                          child: const Text(
+                            // Hardcoded
+                            'French',
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -124,13 +118,13 @@ class _LandingPageState extends State<LandingPage> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Divider
-                     
                       const SizedBox(height: 20),
-                      
-                    
-                      SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 20),
+
+                      SizedBox(
+                        height: MediaQuery.of(context).viewInsets.bottom + 20,
+                      ),
                     ],
                   ),
                 ),

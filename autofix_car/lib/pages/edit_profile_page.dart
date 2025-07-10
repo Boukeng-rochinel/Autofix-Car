@@ -43,7 +43,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _locationController = TextEditingController(text: widget.userProfile.userLocation);
     _emailController = TextEditingController(text: widget.userProfile.email);
     _carModelController = TextEditingController(text: widget.userProfile.carModel);
-    _mobileContactController = TextEditingController(text: widget.userProfile.mobileContact);
+    _mobileContactController = TextEditingController(text: widget.userProfile.contact);
   }
 
   @override
@@ -123,7 +123,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       imageUrl: widget.userProfile.imageUrl, // Or use _pickedImageFile.path if you want to store local path temporarily
       email: _emailController.text,
       carModel: _carModelController.text,
-      mobileContact: _mobileContactController.text,
+      contact: _mobileContactController.text,
     );
 
     ScaffoldMessenger.of(context).showSnackBar(

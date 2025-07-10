@@ -11,7 +11,7 @@ class UserProfile {
   imageUrl; // Added: For profile image URL, used in EditProfilePage
   final String? carModel;
   final String?
-  mobileContact; // Renamed from `contact` to match EditProfilePage
+  contact; // Renamed from `contact` to match EditProfilePage
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? role; // Added: For user role, if applicable
@@ -24,7 +24,7 @@ class UserProfile {
     this.userLocation, // Renamed
     this.imageUrl, // Now a field in the constructor
     this.carModel,
-    this.mobileContact, // Renamed
+    this.contact, // Renamed
     this.createdAt,
     this.updatedAt,
     this.role,
@@ -40,7 +40,7 @@ class UserProfile {
       imageUrl: json['image_url'] as String? ?? '',
       carModel: json['car_model'] as String? ?? '',
       role: json['role'] as String? ?? '',
-      mobileContact: json['mobile_contact'] as String? ?? '',
+      contact: json['mobile_contact'] as String? ?? '',
       createdAt: _parseTimestamp(json['createdAt']),
       updatedAt: _parseTimestamp(json['updatedAt']),
     );
@@ -68,8 +68,8 @@ class UserProfile {
       'image_url': imageUrl, // Include if you're uploading image URLs
       'car_model': carModel,
       'role': role, // Include if your backend supports user roles
-      'mobile_contact':
-          mobileContact, // Match backend field name if different from `contact`
+      'contact':
+          contact, // Match backend field name if different from `contact`
       // createdAt and updatedAt are typically set by the backend server
     };
   }
@@ -83,7 +83,7 @@ class UserProfile {
     String? imageUrl, // Added to copyWith
     String? carModel,
     String? role,
-    String? mobileContact, // Renamed
+    String? contact, // Renamed
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -96,7 +96,7 @@ class UserProfile {
       imageUrl: imageUrl ?? this.imageUrl, // Included in copyWith
       carModel: carModel ?? this.carModel,
       role: role ?? this.role,
-      mobileContact: mobileContact ?? this.mobileContact,
+      contact: contact ?? this.contact,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -64,7 +64,7 @@ class WelcomePage extends StatelessWidget {
               // Tagline
               Text(
                 'Diagnose your car fault with peace of mind.',
-                style: AppStyles.bodyText.copyWith(color: AppColors.greyTextColor),
+                style: AppStyles.bodyText1.copyWith(color: AppColors.greyTextColor),
                 textAlign: TextAlign.center,
               ),
 

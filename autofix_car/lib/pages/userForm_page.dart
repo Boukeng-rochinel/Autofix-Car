@@ -6,14 +6,16 @@ import 'dart:async'; // For Timer/debounce
 import 'package:autofix_car/services/token_manager.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:easy_localization/easy_localization.dart';
+// import 'package:easy_localization/easy_localization.dart'; // Removed
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import './main_navigation.dart';
 
 // IMPORTANT: Replace with your actual backend API base URL
 // Ensure this matches your Render deployed backend URL, or localhost for dev
-const String kApiBaseUrl = 'http://localhost:5000'; // For local dev
+final String kApiBaseUrl =
+    dotenv.env['BASE_URL'] ?? 'http://fallback.url'; // For local dev
 // const String kApiBaseUrl = 'https://your-backend-app.onrender.com'; // For deployed backend
 
 // This would be your real API base URL for geocoding
@@ -260,7 +262,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('complete_profile'.tr()),
+        title: const Text('Complete Profile'), // Hardcoded
         backgroundColor: Colors.blueAccent,
         elevation: 0,
       ),
@@ -286,65 +288,84 @@ class _UserProfileFormState extends State<UserProfileForm> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Center(
-                    child: Stack(
-                    children: [
-                    CircleAvatar(
-                    radius: 48,
-                    backgroundColor: Colors.blueAccent,
-                    backgroundImage: _pickedImageFile != null
-                    ? FileImage(_pickedImageFile!)
-                    : null,
-                    child: _pickedImageFile == null
-                    ? const Icon(Icons.person, size: 48, color: Colors.white)
-                    : null,
-                    ),
-                    Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: InkWell(
-                    onTap: () async {
-                    final picker = ImagePicker();
-                    final source = await showDialog<ImageSource>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                    title: const Text('Select Image Source'),
-                    actions: [
-                    TextButton(
-                    onPressed: () => Navigator.pop(context, ImageSource.camera),
-                    child: const Text('Camera'),
-                    ),
-                    TextButton(
-                    onPressed: () => Navigator.pop(context, ImageSource.gallery),
-                    child: const Text('Gallery'),
-                    ),
-                    ],
-                    ),
-                    );
-                    if (source != null) {
-                    final picked = await picker.pickImage(
-                    source: source,
-                    imageQuality: 75,
-                    );
-                    if (picked != null) {
-                    setState(() {
-                    _pickedImageFile = File(picked.path);
-                    });
-                    }
-                    }
-                    },
-                    child: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: const Icon(Icons.camera_alt, color: Colors.blueAccent),
-                    ),
-                    ),
-                    ),
-                    ],
-                    ),
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 48,
+                            backgroundColor: Colors.blueAccent,
+                            backgroundImage: _pickedImageFile != null
+                                ? FileImage(_pickedImageFile!)
+                                : null,
+                            child: _pickedImageFile == null
+                                ? const Icon(
+                                    Icons.person,
+                                    size: 48,
+                                    color: Colors.white,
+                                  )
+                                : null,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: InkWell(
+                              onTap: () async {
+                                final picker = ImagePicker();
+                                final source = await showDialog<ImageSource>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text(
+                                      'Select Image Source',
+                                    ), // Hardcoded
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(
+                                          context,
+                                          ImageSource.camera,
+                                        ),
+                                        child: const Text(
+                                          'Camera',
+                                        ), // Hardcoded
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(
+                                          context,
+                                          ImageSource.gallery,
+                                        ),
+                                        child: const Text(
+                                          'Gallery',
+                                        ), // Hardcoded
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (source != null) {
+                                  final picked = await picker.pickImage(
+                                    source: source,
+                                    imageQuality: 75,
+                                  );
+                                  if (picked != null) {
+                                    setState(() {
+                                      _pickedImageFile = File(picked.path);
+                                    });
+                                  }
+                                }
+                              },
+                              child: CircleAvatar(
+                                radius: 18,
+                                backgroundColor: Colors.white,
+                                child: const Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.blueAccent,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 18.0),
                     Text(
-                      'lets_get_to_know_you'.tr(),
+                      'Let\'s get to know you!', // Hardcoded
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 22,
@@ -354,7 +375,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                     ),
                     const SizedBox(height: 8.0),
                     Text(
-                      'fill_in_details'.tr(),
+                      'Please fill in your details below.', // Hardcoded
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 15, color: Colors.black54),
                     ),
@@ -388,7 +409,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                     TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        labelText: 'full_name'.tr(),
+                        labelText: 'Full Name', // Hardcoded
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -398,7 +419,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'please_enter_full_name'.tr();
+                          return 'Please enter your full name.'; // Hardcoded
                         }
                         return null;
                       },
@@ -434,7 +455,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                         });
                       },
                       decoration: InputDecoration(
-                        labelText: 'car_model'.tr(),
+                        labelText: 'Car Model', // Hardcoded
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -444,7 +465,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'please_select_car_model'.tr();
+                          return 'Please select a car model.'; // Hardcoded
                         }
                         return null;
                       },
@@ -454,7 +475,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                       controller: _phoneNumberController,
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
-                        labelText: 'phone_number'.tr(),
+                        labelText: 'Phone Number', // Hardcoded
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -464,7 +485,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'please_enter_phone_number'.tr();
+                          return 'Please enter your phone number.'; // Hardcoded
                         }
                         // Basic phone number validation (e.g., regex for specific formats)
                         return null;
@@ -475,7 +496,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                     TextFormField(
                       controller: _addressController,
                       decoration: InputDecoration(
-                        labelText: 'your_location'.tr(),
+                        labelText: 'Your Location', // Hardcoded
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -499,11 +520,11 @@ class _UserProfileFormState extends State<UserProfileForm> {
                       onChanged: _fetchLocationSuggestions,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'please_enter_address'.tr();
+                          return 'Please enter your address.'; // Hardcoded
                         }
                         if (_selectedLocation == null ||
                             _selectedLocation!['display_name'] != value) {
-                          return 'please_select_valid_address'.tr();
+                          return 'Please select a valid address from suggestions.'; // Hardcoded
                         }
                         return null;
                       },
@@ -511,7 +532,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                     const SizedBox(height: 8.0),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.map, color: Colors.white),
-                      label: Text('pick_from_map'.tr()),
+                      label: const Text('Pick from Map'), // Hardcoded
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
                         foregroundColor: Colors.white,
@@ -535,7 +556,9 @@ class _UserProfileFormState extends State<UserProfileForm> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(18),
                                   ),
-                                  title: const Text('Pick Location from Map'),
+                                  title: const Text(
+                                    'Pick Location from Map',
+                                  ), // Hardcoded
                                   content: SizedBox(
                                     width: 320,
                                     height: 320,
@@ -592,7 +615,9 @@ class _UserProfileFormState extends State<UserProfileForm> {
                                           TextButton(
                                             onPressed: () =>
                                                 Navigator.of(context).pop(),
-                                            child: const Text('Cancel'),
+                                            child: const Text(
+                                              'Cancel',
+                                            ), // Hardcoded
                                           ),
                                           ElevatedButton(
                                             onPressed: () async {
@@ -630,7 +655,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                                               });
                                             },
                                             child: const Text(
-                                              'Select this location',
+                                              'Select this location', // Hardcoded
                                             ),
                                           ),
                                         ],
@@ -703,7 +728,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              '${'selected'.tr()}: ${_selectedLocation!['display_name']}',
+                              'Selected: ${_selectedLocation!['display_name']}', // Hardcoded
                               style: const TextStyle(
                                 color: Colors.green,
                                 fontSize: 13,
@@ -737,7 +762,7 @@ class _UserProfileFormState extends State<UserProfileForm> {
                                 strokeWidth: 2,
                               ),
                             )
-                          : Text('update_profile'.tr()),
+                          : const Text('Update Profile'), // Hardcoded
                     ),
                   ],
                 ),

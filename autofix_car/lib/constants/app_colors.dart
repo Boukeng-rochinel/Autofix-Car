@@ -29,6 +29,7 @@ class AppColors {
   static const Color borderColor = Color(0xFFE2E8F0);  // Light grey for borders
   static const Color inputFillColor = Color(0xFFF7FAFC); // Very light grey for input fields
   // static const Color backgroundColor = Color(0xFFF8F8F8); // Light background for general use
+  static const Color titleColor = Color(0xFF1E40AF);
 
 
   // Specific colors for the dashboard page

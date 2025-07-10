@@ -19,6 +19,10 @@ class _NotificationPageState extends State<NotificationPage>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
+  // TODO: Replace with actual userId fetching logic
+  // If userId is null, notifications are for everyone
+  final String? userId = null; // or fetch from auth provider
+
   List<NotificationItem> _allNotifications = [];
   bool _isLoading = true;
   String _selectedFilter = 'All'; // 'All', 'Unread', 'Read'
@@ -57,7 +61,7 @@ class _NotificationPageState extends State<NotificationPage>
   Future<void> _loadNotifications() async {
     setState(() => _isLoading = true);
     try {
-      _allNotifications = await NotificationService.getMyNotifications();
+      _allNotifications = await NotificationService.getMyNotifications(userId ?? '');
       // Sort notifications by timestamp, newest first
       _allNotifications.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     } catch (e) {
@@ -78,7 +82,7 @@ class _NotificationPageState extends State<NotificationPage>
     if (notification.isRead) return; // Already read
 
     try {
-      await NotificationService.markNotificationAsRead(notification.id!);
+      await NotificationService.markNotificationAsRead(userId ?? '', notification.id!);
       setState(() {
         final index = _allNotifications.indexOf(notification);
         if (index != -1) {
@@ -119,7 +123,7 @@ class _NotificationPageState extends State<NotificationPage>
 
     if (confirmed == true && notification.id != null) {
       try {
-        await NotificationService.deleteNotification(notification.id!);
+        await NotificationService.deleteNotification(userId ?? '', notification.id!);
         setState(() {
           _allNotifications.removeWhere((item) => item.id == notification.id);
         });
@@ -193,10 +197,10 @@ class _NotificationPageState extends State<NotificationPage>
       ),
       leading: Container(
         margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(12),
-        ),
+        // decoration: BoxDecoration(
+        //   color: Colors.white.withOpacity(0.2),
+        //   borderRadius: BorderRadius.circular(12),
+        // ),
         child: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
@@ -231,10 +235,10 @@ class _NotificationPageState extends State<NotificationPage>
       actions: [
         Container(
           margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
+          // decoration: BoxDecoration(
+          //   color: Colors.white.withOpacity(0.2),
+          //   borderRadius: BorderRadius.circular(12),
+          // ),
           child: PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white),
             onSelected: (value) {
@@ -691,7 +695,7 @@ class _NotificationPageState extends State<NotificationPage>
       // For now, we iterate and call the existing markAsRead
       for (final notification in unreadNotifications) {
         if (notification.id != null) {
-          await NotificationService.markNotificationAsRead(notification.id!);
+          await NotificationService.markNotificationAsRead(userId ?? '', notification.id!);
         }
       }
       _loadNotifications(); // Reload to update UI
@@ -743,7 +747,7 @@ class _NotificationPageState extends State<NotificationPage>
       // Again, a single backend endpoint for this would be better
       for (final notification in List.from(_allNotifications)) {
         if (notification.id != null) {
-          await NotificationService.deleteNotification(notification.id!);
+          await NotificationService.deleteNotification(userId ?? '', notification.id!);
         }
       }
       _loadNotifications(); // Reload data

@@ -1,7 +1,7 @@
 // lib/models/notification_item.dart
 class NotificationItem {
   final String? id; // Document ID from backend, made nullable for new items
-  final String userId; // The UID of the user this notification is for
+  final String? userId; // The UID of the user this notification is for (nullable for global)
   final String title;
   final String message;
   final DateTime timestamp;
@@ -13,7 +13,7 @@ class NotificationItem {
 
   NotificationItem({
     this.id, // Made nullable
-    required this.userId,
+    this.userId, // Now nullable
     required this.title,
     required this.message,
     this.imageUrl, // Made optional/nullable
@@ -44,9 +44,9 @@ class NotificationItem {
 
     return NotificationItem(
       id: json['id'] as String?, // Parse as nullable String
-      userId: json['user_id'] as String,
-      title: json['title'] as String,
-      message: json['message'] as String,
+      userId: json['user_id'] as String?, // Now nullable
+      title: json['title'] as String? ?? '',
+      message: json['message'] as String? ?? '',
       timestamp: parsedTimestamp,
       isRead: json['is_read'] as bool? ?? false,
       imageUrl: json['image_url'] as String?, // Parse imageUrl

@@ -1,4 +1,4 @@
-// lib/pages/mechanics_page.dart
+import 'package:autofix_car/pages/notification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +9,8 @@ import '../services/mechanic_service.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_styles.dart';
 import '../widgets/mechanic_card.dart';
+import '../models/notification_item.dart';
+import '../services/notification_service.dart';
 
 class MechanicsPage extends StatefulWidget {
   const MechanicsPage({super.key});
@@ -27,6 +29,7 @@ class _MechanicsPageState extends State<MechanicsPage>
   List<Mechanic> _filteredMechanics = [];
   bool _isLoading = true;
   String _errorMessage = '';
+  int _unreadNotificationCount = 0;
 
   final List<String> _cameroonRegions = [
     'All Regions',
@@ -56,6 +59,7 @@ class _MechanicsPageState extends State<MechanicsPage>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _loadMechanics();
+    _fetchUnreadNotificationCount();
   }
 
   @override
@@ -65,25 +69,114 @@ class _MechanicsPageState extends State<MechanicsPage>
     super.dispose();
   }
 
-  Future<void> _loadMechanics() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-    });
+  Future<void> _fetchUnreadNotificationCount() async {
     try {
-      _mechanics = await MechanicService.getAllMechanics();
-      _applyFilters();
-      _animationController.forward();
+      final notifications = await NotificationService.getMyNotifications(null);
+      if (!mounted) return;
+      setState(() {
+        _unreadNotificationCount = notifications.where((n) => !n.isRead).length;
+      });
     } catch (e) {
-      debugPrint('Error loading mechanics: $e');
-      setState(() {
-        _errorMessage = 'Failed to load mechanics: ${e.toString()}';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      // ignore error
     }
+  }
+
+  Future<void> _addMechanicNotification(
+    String action,
+    Mechanic mechanic,
+  ) async {
+    try {
+      final notification = NotificationItem(
+        userId: null,
+        title: 'Mechanic ${action == 'call' ? 'Call' : 'Message'}',
+        message:
+            'You ${action == 'call' ? 'called' : 'messaged'} ${mechanic.name} (${mechanic.phone})',
+        timestamp: DateTime.now(),
+        isRead: false,
+        type: 'mechanic',
+        data: {
+          'mechanicName': mechanic.name,
+          'mechanicPhone': mechanic.phone,
+          'action': action,
+        },
+      );
+      await NotificationService.createNotification(notification);
+      _fetchUnreadNotificationCount();
+    } catch (e) {
+      // ignore error
+    }
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber, Mechanic mechanic) async {
+    final cleanedPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+    final Uri launchUri = Uri(scheme: 'tel', path: cleanedPhoneNumber);
+
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+      await _addMechanicNotification('call', mechanic);
+    } else {
+      _showSnackBar(
+        'Could not launch phone dialer for $phoneNumber',
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> _launchWhatsApp(
+    String phoneNumber,
+    String message,
+    Mechanic mechanic,
+  ) async {
+    final cleanedPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+    final String url =
+        'https://wa.me/$cleanedPhoneNumber?text=${Uri.encodeComponent(message)}';
+    final Uri launchUri = Uri.parse(url);
+
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+      await _addMechanicNotification('message', mechanic);
+    } else {
+      _showSnackBar(
+        'Could not launch WhatsApp. Make sure WhatsApp is installed.',
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> _openWebsite(String? websiteUrl) async {
+    if (websiteUrl == null || websiteUrl.isEmpty) {
+      _showSnackBar('No website available for this mechanic.', isError: true);
+      return;
+    }
+    final Uri launchUri = Uri.parse(websiteUrl);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      _showSnackBar('Could not launch $websiteUrl', isError: true);
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              isError ? Icons.error_outline : Icons.check_circle_outline,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: isError ? Colors.red[600] : Colors.green[600],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 
   void _applyFilters() {
@@ -107,69 +200,25 @@ class _MechanicsPageState extends State<MechanicsPage>
     });
   }
 
-  Future<void> _makePhoneCall(String phoneNumber) async {
-    final cleanedPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
-    final Uri launchUri = Uri(scheme: 'tel', path: cleanedPhoneNumber);
-
-    if (await canLaunchUrl(launchUri)) {
-      await launchUrl(launchUri);
-    } else {
-      _showSnackBar(
-        'Could not launch phone dialer for $phoneNumber',
-        isError: true,
-      );
+  Future<void> _loadMechanics() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+    try {
+      _mechanics = await MechanicService.getAllMechanics();
+      _applyFilters();
+      _animationController.forward();
+    } catch (e) {
+      debugPrint('Error loading mechanics: $e');
+      setState(() {
+        _errorMessage = 'Failed to load mechanics: ${e.toString()}';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-  }
-
-  Future<void> _launchWhatsApp(String phoneNumber, String message) async {
-    final cleanedPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
-    final String url =
-        'https://wa.me/$cleanedPhoneNumber?text=${Uri.encodeComponent(message)}';
-    final Uri launchUri = Uri.parse(url);
-
-    if (await canLaunchUrl(launchUri)) {
-      await launchUrl(launchUri);
-    } else {
-      _showSnackBar(
-        'Could not launch WhatsApp. Make sure WhatsApp is installed.',
-        isError: true,
-      );
-    }
-  }
-
-  Future<void> _openWebsite(String? websiteUrl) async {
-    if (websiteUrl == null || websiteUrl.isEmpty) {
-      _showSnackBar('No website available for this mechanic.', isError: true);
-      return;
-    }
-    final Uri launchUri = Uri.parse(websiteUrl);
-    if (await canLaunchUrl(launchUri)) {
-      await launchUrl(launchUri);
-    } else {
-      _showSnackBar('Could not launch $websiteUrl', isError: true);
-    }
-  }
-
-  void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              isError ? Icons.error_outline : Icons.check_circle_outline,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: isError ? Colors.red[600] : Colors.green[600],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
   }
 
   @override
@@ -207,28 +256,55 @@ class _MechanicsPageState extends State<MechanicsPage>
       backgroundColor: AppColors.primaryColor,
       elevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle.light,
-      leading: Container(
-        margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       actions: [
         Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(30),
           ),
-          child: IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () =>
-                _showSnackBar('Notifications feature coming soon!'),
+          child: Stack(
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.notifications_outlined,
+                  color: Colors.white,
+                ),
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => NotificationPage()),
+                  );
+                  _fetchUnreadNotificationCount();
+                },
+              ),
+              if (_unreadNotificationCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 20,
+                      minHeight: 20,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$_unreadNotificationCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ],
@@ -238,7 +314,7 @@ class _MechanicsPageState extends State<MechanicsPage>
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 15,
           ),
         ),
         background: Container(
@@ -286,31 +362,15 @@ class _MechanicsPageState extends State<MechanicsPage>
   }
 
   Widget _buildLoadingWidget() {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.6,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  AppColors.primaryColor,
-                ),
-                strokeWidth: 3,
-              ),
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+              strokeWidth: 3,
             ),
             const SizedBox(height: 24),
             Text(
@@ -406,7 +466,7 @@ class _MechanicsPageState extends State<MechanicsPage>
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
               color: AppColors.inputFillColor,
@@ -417,7 +477,7 @@ class _MechanicsPageState extends State<MechanicsPage>
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search mechanics, specialties, or location',
-                hintStyle: AppStyles.bodyText2.copyWith(
+                hintStyle: AppStyles.bodyText1.copyWith(
                   color: Colors.grey[500],
                 ),
                 prefixIcon: Container(
@@ -453,7 +513,7 @@ class _MechanicsPageState extends State<MechanicsPage>
               onChanged: (query) => _applyFilters(),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 11),
           Container(
             decoration: BoxDecoration(
               color: AppColors.inputFillColor,
@@ -542,7 +602,7 @@ class _MechanicsPageState extends State<MechanicsPage>
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         _filteredMechanics.isEmpty
             ? _buildEmptyState()
             : RefreshIndicator(
@@ -564,8 +624,9 @@ class _MechanicsPageState extends State<MechanicsPage>
                         onMessage: (mech) => _launchWhatsApp(
                           mech.phone,
                           'Hello ${mech.name}, I need assistance with my car from the AutoFix app.',
+                          mech,
                         ),
-                        onCall: (mech) => _makePhoneCall(mech.phone),
+                        onCall: (mech) => _makePhoneCall(mech.phone, mech),
                         onShare: (mech) =>
                             _showSnackBar('Share feature coming soon!'),
                       ),
@@ -641,8 +702,8 @@ class _MechanicsPageState extends State<MechanicsPage>
                 backgroundColor: AppColors.primaryColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
+                  horizontal: 12,
+                  vertical: 8,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

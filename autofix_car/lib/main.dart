@@ -4,7 +4,6 @@ import 'package:autofix_car/constants/app_colors.dart';
 import 'package:autofix_car/constants/app_styles.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 import 'package:autofix_car/pages/landing_page.dart';
 import 'package:autofix_car/pages/main_navigation.dart';
@@ -18,20 +17,9 @@ void main() async {
   await dotenv.load(fileName: ".env");
 
   // Initialize Firebase Core
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  await EasyLocalization.ensureInitialized();
-
-  runApp(
-    EasyLocalization(
-      supportedLocales: const [Locale('en'), Locale('fr')],
-      path: 'l10n',
-      fallbackLocale: const Locale('en'),
-      child: const AutoFixApp(),
-    ),
-  );
+  runApp(const AutoFixApp());
 }
 
 class AutoFixApp extends StatelessWidget {
@@ -58,9 +46,10 @@ class AutoFixApp extends StatelessWidget {
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      localizationsDelegates: context.localizationDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
+      // Removed easy_localization specific properties:
+      // localizationsDelegates: context.localizationDelegates,
+      // supportedLocales: context.supportedLocales,
+      // locale: context.locale,
       home: FutureBuilder<bool>(
         future: _checkLoginStatus(),
         builder: (context, snapshot) {

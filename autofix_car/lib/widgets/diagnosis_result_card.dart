@@ -133,8 +133,8 @@ class DiagnosisResultCard extends StatelessWidget {
               ...(result['youtubeVideos'] as List).map<Widget>((video) {
                 final String videoTitle = video['title'] ?? 'No Title';
                 final String videoChannel = video['channel'] ?? 'Unknown Channel';
-                final String videoUrl = video['url'] ?? '';
-                final String videoThumbnail = video['thumbnail'] ?? 'https://placehold.co/60x60/F0F0F0/000000?text=Video';
+                final String videoUrl = video['https://www.youtube.com/watch?v=3Fs7goQcYWk&pp=ygUhdW5kZXJzdGFuZGluZyBjYXIgZmF1bHQgZGlhZ25vc2lz'] ?? '';
+                final String videoThumbnail = video['https://img.youtube.com/vi/3Fs7goQcYWk/maxresdefault.jpg'] ?? '';
 
                 return Card(
                   color: AppColors.inputFillColor,

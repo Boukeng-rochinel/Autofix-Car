@@ -1,4 +1,7 @@
 // lib/screens/history_page.dart
+import 'package:autofix_car/constants/app_colors.dart';
+import 'package:autofix_car/constants/app_styles.dart';
+import 'package:autofix_car/pages/notification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart'; // Ensure this is imported for date formatting
@@ -258,67 +261,67 @@ class _HistoryPageState extends State<HistoryPage>
       child: Column(
         children: [
           // Search Bar
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search your diagnostic history...',
-                hintStyle: TextStyle(color: Colors.grey[500], fontSize: 16),
-                prefixIcon: Container(
-                  margin: const EdgeInsets.all(12),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF3B82F6).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.search_rounded,
-                    color: Color(0xFF3B82F6),
-                    size: 20,
-                  ),
-                ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(
-                          Icons.clear_rounded,
-                          color: Colors.grey,
-                        ),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged();
-                        },
-                      )
-                    : Container(
-                        margin: const EdgeInsets.all(12),
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          Icons.mic_rounded,
-                          color: Colors.grey[600],
-                          size: 20,
-                        ),
-                      ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ),
+          // Container(
+          //   decoration: BoxDecoration(
+          //     color: Colors.white,
+          //     borderRadius: BorderRadius.circular(16),
+          //     boxShadow: [
+          //       BoxShadow(
+          //         color: Colors.black.withOpacity(0.05),
+          //         blurRadius: 10,
+          //         offset: const Offset(0, 4),
+          //       ),
+          //     ],
+          //   ),
+          //   child: TextField(
+          //     controller: _searchController,
+          //     decoration: InputDecoration(
+          //       hintText: 'Search your diagnostic history...',
+          //       hintStyle: TextStyle(color: Colors.grey[500], fontSize: 16),
+          //       prefixIcon: Container(
+          //         margin: const EdgeInsets.all(12),
+          //         padding: const EdgeInsets.all(8),
+          //         decoration: BoxDecoration(
+          //           color: const Color(0xFF3B82F6).withOpacity(0.1),
+          //           borderRadius: BorderRadius.circular(10),
+          //         ),
+          //         child: const Icon(
+          //           Icons.search_rounded,
+          //           color: Color(0xFF3B82F6),
+          //           size: 20,
+          //         ),
+          //       ),
+          //       suffixIcon: _searchController.text.isNotEmpty
+          //           ? IconButton(
+          //               icon: const Icon(
+          //                 Icons.clear_rounded,
+          //                 color: Colors.grey,
+          //               ),
+          //               onPressed: () {
+          //                 _searchController.clear();
+          //                 _onSearchChanged();
+          //               },
+          //             )
+          //           : Container(
+          //               margin: const EdgeInsets.all(12),
+          //               padding: const EdgeInsets.all(8),
+          //               decoration: BoxDecoration(
+          //                 color: Colors.grey.withOpacity(0.1),
+          //                 borderRadius: BorderRadius.circular(10),
+          //               ),
+          //               child: Icon(
+          //                 Icons.mic_rounded,
+          //                 color: Colors.grey[600],
+          //                 size: 20,
+          //               ),
+          //             ),
+          //       border: InputBorder.none,
+          //       contentPadding: const EdgeInsets.symmetric(vertical: 16),
+          //     ),
+          //   ),
+          // ),
 
-          const SizedBox(height: 16),
+          // const SizedBox(height: 16),
 
           // Quick Stats
           Row(
@@ -363,7 +366,7 @@ class _HistoryPageState extends State<HistoryPage>
     Color color,
   ) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -378,14 +381,14 @@ class _HistoryPageState extends State<HistoryPage>
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: color, size: 15),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             value,
             style: const TextStyle(
@@ -396,10 +399,9 @@ class _HistoryPageState extends State<HistoryPage>
           ),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
+            style: AppStyles.bodyText.copyWith(
+              color: AppColors.greyTextColor,
+              fontSize: AppStyles.bodyText2.fontSize,
             ),
           ),
         ],
@@ -511,7 +513,7 @@ class _HistoryPageState extends State<HistoryPage>
                   ),
                 ),
 
-                const SizedBox(width: 16),
+                const SizedBox(width: 10),
 
                 // Content
                 Expanded(
@@ -662,6 +664,7 @@ class _HistoryPageState extends State<HistoryPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -670,11 +673,11 @@ class _HistoryPageState extends State<HistoryPage>
             ),
             child: Icon(
               Icons.history_rounded,
-              size: 48,
+              size: 35,
               color: Colors.grey[400],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 10),
           Text(
             _searchController.text.isNotEmpty
                 ? 'No results found'
@@ -695,7 +698,7 @@ class _HistoryPageState extends State<HistoryPage>
           ),
           if (_searchController.text.isEmpty && _currentUserId != null) ...[
             // Only show button if logged in
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
@@ -710,7 +713,7 @@ class _HistoryPageState extends State<HistoryPage>
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
-                  vertical: 12,
+                  vertical: 8,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -1057,8 +1060,9 @@ class _HistoryPageState extends State<HistoryPage>
   }
 
   void _openSettings() {
-    ScaffoldMessenger.of(
+    Navigator.push(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Settings page coming soon!')));
+      MaterialPageRoute(builder: (context) => NotificationPage()),
+    );
   }
 }

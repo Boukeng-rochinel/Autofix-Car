@@ -1,5 +1,8 @@
 // lib/screens/profile_page.dart
 import 'package:autofix_car/pages/forgot_password_page.dart';
+import 'package:autofix_car/pages/notification_page.dart';
+import 'package:autofix_car/pages/userForm_page.dart';
+import 'package:autofix_car/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:autofix_car/pages/home_page.dart';
 // import 'package:autofix_car/pages/welcome_page.dart';
@@ -42,28 +45,23 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _fetchUserProfileAndRole() async {
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
     try {
       // Fetch user profile from backend
       final token = await TokenManager.getIdToken();
       final userId = await TokenManager.getUid();
-      final response = await http.get(
-        Uri.parse('http://localhost:5000/users/:$userId'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final userProfile = UserProfile.fromJson(data);
-        setState(() {
-          _userProfile = userProfile;
-          _isAdmin = userProfile.role == 'admin';
-          _isLoading = false;
-        });
-      } else {
-        setState(() { _isLoading = false; });
-      }
+      final userProfile = await UserService.getUserProfile();
+      setState(() {
+        _userProfile = userProfile;
+        _isAdmin = userProfile.role == 'admin';
+        _isLoading = false;
+      });
     } catch (e) {
-      setState(() { _isLoading = false; });
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -123,7 +121,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final updatedProfile = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditProfilePage(userProfile: _userProfile!),
+        builder: (context) => UserProfileForm(),
       ),
     );
 
@@ -161,16 +159,16 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             if (_isLoading)
-            const Padding(
-            padding: EdgeInsets.all(32.0),
-            child: Center(child: CircularProgressIndicator()),
-            )
+              const Padding(
+                padding: EdgeInsets.all(32.0),
+                child: Center(child: CircularProgressIndicator()),
+              )
             else if (_userProfile != null) ...[
-            ProfileHeader(userProfile: _userProfile!),
-            PersonalInfoCard(
-            userProfile: _userProfile!,
-            onLogout: _handleLogout,
-            ),
+              ProfileHeader(userProfile: _userProfile!),
+              PersonalInfoCard(
+                userProfile: _userProfile!,
+                onLogout: _handleLogout,
+              ),
             ],
             const SizedBox(height: 20), // Spacing after personal info card
             // New Section for Account Options
@@ -187,105 +185,126 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 10),
                   Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: Icon(
+                            Icons.edit_outlined,
+                            color: AppColors.primaryColor,
+                          ),
+                          title: Text(
+                            'Edit Profile',
+                            style: AppStyles.bodyText.copyWith(
+                              color: AppColors.textColor,
+                            ),
+                          ),
+                          trailing: Icon(
+                            Icons.arrow_forward_ios,
+                            size: 18,
+                            color: AppColors.greyTextColor,
+                          ),
+                          onTap: _onEditProfile,
+                        ),
+                        Divider(
+                          indent: 16,
+                          endIndent: 16,
+                          height: 1,
+                          color: AppColors.lightGrey,
+                        ),
+                        ListTile(
+                          leading: Icon(
+                            Icons.lock_reset_outlined,
+                            color: AppColors.primaryColor,
+                          ),
+                          title: Text(
+                            'Change Password',
+                            style: AppStyles.bodyText.copyWith(
+                              color: AppColors.textColor,
+                            ),
+                          ),
+                          trailing: Icon(
+                            Icons.arrow_forward_ios,
+                            size: 18,
+                            color: AppColors.greyTextColor,
+                          ),
+                          onTap: _onForgotPassword,
+                        ),
+                        if (_isAdmin) ...[
+                          Divider(
+                            indent: 16,
+                            endIndent: 16,
+                            height: 1,
+                            color: AppColors.lightGrey,
+                          ),
+                          ListTile(
+                            leading: Icon(
+                              Icons.engineering,
+                              color: AppColors.primaryColor,
+                            ),
+                            title: Text(
+                              'Create Mechanic',
+                              style: AppStyles.bodyText.copyWith(
+                                color: AppColors.textColor,
+                              ),
+                            ),
+                            trailing: Icon(
+                              Icons.arrow_forward_ios,
+                              size: 18,
+                              color: AppColors.greyTextColor,
+                            ),
+                            onTap: _redirectCreateMechanics,
+                          ),
+                          ListTile(
+                            leading: Icon(
+                              Icons.admin_panel_settings,
+                              color: AppColors.primaryColor,
+                            ),
+                            title: Text(
+                              'Admin Dashboard',
+                              style: AppStyles.bodyText.copyWith(
+                                color: AppColors.textColor,
+                              ),
+                            ),
+                            trailing: Icon(
+                              Icons.arrow_forward_ios,
+                              size: 18,
+                              color: AppColors.greyTextColor,
+                            ),
+                            onTap: _redirectAdmin,
+                          ),
+                        ],
+                        Divider(
+                          indent: 16,
+                          endIndent: 16,
+                          height: 1,
+                          color: AppColors.lightGrey,
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.logout, color: Colors.red[400]),
+                          title: Text(
+                            'Logout',
+                            style: AppStyles.bodyText.copyWith(
+                              color: Colors.red[400],
+                            ),
+                          ),
+                          trailing: Icon(
+                            Icons.arrow_forward_ios,
+                            size: 18,
+                            color: AppColors.greyTextColor,
+                          ),
+                          onTap: _handleLogout,
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Column(
-                  children: [
-                  ListTile(
-                  leading: Icon(
-                  Icons.edit_outlined,
-                  color: AppColors.primaryColor,
-                  ),
-                  title: Text(
-                  'Edit Profile',
-                  style: AppStyles.bodyText.copyWith(
-                  color: AppColors.textColor,
-                  ),
-                  ),
-                  trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 18,
-                  color: AppColors.greyTextColor,
-                  ),
-                  onTap: _onEditProfile,
-                  ),
-                  Divider(
-                  indent: 16,
-                  endIndent: 16,
-                  height: 1,
-                  color: AppColors.lightGrey,
-                  ),
-                  ListTile(
-                  leading: Icon(
-                  Icons.lock_reset_outlined,
-                  color: AppColors.primaryColor,
-                  ),
-                  title: Text(
-                  'Change Password',
-                  style: AppStyles.bodyText.copyWith(
-                  color: AppColors.textColor,
-                  ),
-                  ),
-                  trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 18,
-                  color: AppColors.greyTextColor,
-                  ),
-                  onTap: _onForgotPassword,
-                  ),
-                  if (_isAdmin) ...[
-                  Divider(
-                  indent: 16,
-                  endIndent: 16,
-                  height: 1,
-                  color: AppColors.lightGrey,
-                  ),
-                  ListTile(
-                  leading: Icon(
-                  Icons.engineering,
-                  color: AppColors.primaryColor,
-                  ),
-                  title: Text(
-                  'Create Mechanic',
-                  style: AppStyles.bodyText.copyWith(
-                  color: AppColors.textColor,
-                  ),
-                  ),
-                  trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 18,
-                  color: AppColors.greyTextColor,
-                  ),
-                  onTap: _redirectCreateMechanics,
-                  ),
-                  ListTile(
-                  leading: Icon(
-                  Icons.admin_panel_settings,
-                  color: AppColors.primaryColor,
-                  ),
-                  title: Text(
-                  'Admin Dashboard',
-                  style: AppStyles.bodyText.copyWith(
-                  color: AppColors.textColor,
-                  ),
-                  ),
-                  trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 18,
-                  color: AppColors.greyTextColor,
-                  ),
-                  onTap: _redirectAdmin,
-                  ),
-                  ],
-                  ],
-                  ),
-                  ),
+                  const SizedBox(height: 20), // Add some spacing at the bottom
                 ],
               ),
             ),
-            const SizedBox(height: 20), // Add some spacing at the bottom
           ],
         ),
       ),
@@ -322,8 +341,9 @@ class _ProfilePageState extends State<ProfilePage> {
           icon: const Icon(Icons.notifications_outlined, color: Colors.black),
           onPressed: () {
             // Handle notification button press
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Notifications button pressed!')),
+             Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NotificationPage()),
             );
           },
         ),

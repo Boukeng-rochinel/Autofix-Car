@@ -9,10 +9,12 @@ import '../services/base_service.dart'; // Import BaseService for authenticated 
 final String kBaseUrl = dotenv.env['BASE_URL'] ?? 'http://fallback.url';
 
 class NotificationService {
-  // Get all notifications for the authenticated user
-  static Future<List<NotificationItem>> getMyNotifications() async {
+  // Get all notifications for a specific user or for everyone if userId is null
+  static Future<List<NotificationItem>> getMyNotifications(String? userId) async {
     final response = await BaseService.makeAuthenticatedRequest((idToken) async {
-      final url = Uri.parse('$kBaseUrl/notifications');
+      final url = (userId != null && userId.isNotEmpty)
+          ? Uri.parse('$kBaseUrl/notifications/$userId')
+          : Uri.parse('$kBaseUrl/notifications');
       return await http.get(
         url,
         headers: {
@@ -31,10 +33,12 @@ class NotificationService {
     }
   }
 
-  // Mark a notification as read
-  static Future<void> markNotificationAsRead(String notificationId) async {
+  // Mark a notification as read for a specific user or for everyone if userId is null
+  static Future<void> markNotificationAsRead(String? userId, String notificationId) async {
     final response = await BaseService.makeAuthenticatedRequest((idToken) async {
-      final url = Uri.parse('$kBaseUrl/notifications/$notificationId/read');
+      final url = (userId != null && userId.isNotEmpty)
+          ? Uri.parse('$kBaseUrl/notifications/$userId/$notificationId/read')
+          : Uri.parse('$kBaseUrl/notifications/$notificationId/read');
       return await http.put(
         url,
         headers: {
@@ -49,10 +53,12 @@ class NotificationService {
     }
   }
 
-  // Delete a notification
-  static Future<void> deleteNotification(String notificationId) async {
+  // Delete a notification for a specific user or for everyone if userId is null
+  static Future<void> deleteNotification(String? userId, String notificationId) async {
     final response = await BaseService.makeAuthenticatedRequest((idToken) async {
-      final url = Uri.parse('$kBaseUrl/notifications/$notificationId');
+      final url = (userId != null && userId.isNotEmpty)
+          ? Uri.parse('$kBaseUrl/notifications/$userId/$notificationId')
+          : Uri.parse('$kBaseUrl/notifications/$notificationId');
       return await http.delete(
         url,
         headers: {
@@ -69,9 +75,11 @@ class NotificationService {
 
   // ADMIN ONLY: Create a notification (can be sent to specific user or all users)
   // This would typically be called from an admin dashboard
-  static Future<NotificationItem> createNotification(NotificationItem notification) async {
+  static Future<NotificationItem> createNotification(NotificationItem notification, {String? userId}) async {
     final response = await BaseService.makeAuthenticatedRequest((idToken) async {
-      final url = Uri.parse('$kBaseUrl/notifications');
+      final url = userId != null
+          ? Uri.parse('$kBaseUrl/notifications/$userId')
+          : Uri.parse('$kBaseUrl/notifications');
       return await http.post(
         url,
         headers: {

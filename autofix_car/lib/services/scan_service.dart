@@ -2,6 +2,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:io';
 
 import '../models/scan_data.dart'; // Import ScanData model
 import '../services/base_service.dart'; // Import BaseService for authenticated calls
@@ -69,4 +70,50 @@ class ScanService {
   }
 
   // You might want update/delete operations for scans here as well
+
+  // Gemini Icon Detection
+  static Future<Map<String, dynamic>?> detectGeminiIcon(String imagePath) async {
+    final String? geminiApiKey = dotenv.env['GEMINI_API_KEY'];
+    if (geminiApiKey == null) {
+      throw Exception('Gemini API key not found in .env');
+    }
+    final url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=$geminiApiKey');
+    final imageBytes = await File(imagePath).readAsBytes();
+    final base64Image = base64Encode(imageBytes);
+    final body = jsonEncode({
+      "contents": [
+        {
+          "parts": [
+            {
+              "inline_data": {
+                "mime_type": "image/jpeg",
+                "data": base64Image
+              }
+            },
+            {
+              "text": "Detect and describe any icons or symbols in this image. Return the icon name and confidence if possible."
+            }
+          ]
+        }
+      ]
+    });
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: body,
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      // Parse Gemini response for icon detection result
+      if (data['candidates'] != null && data['candidates'].isNotEmpty) {
+        final text = data['candidates'][0]['content']['parts'][0]['text'];
+        return { 'description': text };
+      }
+      return null;
+    } else {
+      throw Exception('Gemini icon detection failed: \\n${response.statusCode} - ${response.body}');
+    }
+  }
 }

@@ -1,4 +1,6 @@
 // widgets/dashboard_header.dart
+import 'package:autofix_car/constants/app_colors.dart';
+import 'package:autofix_car/constants/app_styles.dart';
 import 'package:flutter/material.dart';
 
 class DashboardHeader extends StatelessWidget {
@@ -7,7 +9,7 @@ class DashboardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 580,
+      height: 250,
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
@@ -20,12 +22,11 @@ class DashboardHeader extends StatelessWidget {
       ),
       child: Align(
         alignment: Alignment.bottomLeft,
-        child: const Text(
+        child:  Text(
           'Welcome to AutoFix',
-          style: TextStyle(
-        color: Colors.white,
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
+           style: AppStyles.headline1.copyWith(
+            color: AppColors.backgroundColor,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

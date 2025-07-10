@@ -75,8 +75,8 @@ class PersonalInfoCard extends StatelessWidget {
           InfoRow(
             icon: Icons.phone_outlined,
             label: 'Contact',
-            value: (userProfile.mobileContact ?? '').isNotEmpty
-                ? userProfile.mobileContact!
+            value: (userProfile.contact ?? '').isNotEmpty
+                ? userProfile.contact!
                 : notProvided,
           ),
           InfoRow(

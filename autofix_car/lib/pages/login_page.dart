@@ -1,4 +1,6 @@
 // pages/login_page.dart (Landing Page)
+import 'package:autofix_car/constants/app_colors.dart';
+import 'package:autofix_car/constants/app_styles.dart';
 import 'package:autofix_car/pages/forgot_password_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -71,13 +73,14 @@ class _LoginPageState extends State<LoginPage> {
           uid: uid,
           message: 'Welcome back, $email!',
         );
-      } else {
-        if (mounted) {
-          setState(() {
-            _authMessage = 'Please login or register.';
-          });
-        }
-      }
+      } 
+      // else {
+      //   if (mounted) {
+      //     setState(() {
+      //       _authMessage = 'Please login or register.';
+      //     });
+      //   }
+      // }
     } catch (e) {
       if (mounted) {
         _handleLoginError('Could not check login status: $e');
@@ -302,15 +305,14 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildHeader() {
-    return const Column(
+    return Column(
       children: [
         Center(
           child: Text(
             'AutoFix car',
-            style: TextStyle(
-              fontSize: 28,
+            style: AppStyles.headline2.copyWith(
+              color: AppColors.titleColor,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D3748),
             ),
           ),
         ),
@@ -318,7 +320,10 @@ class _LoginPageState extends State<LoginPage> {
         Center(
           child: Text(
             'Your next service is just a tap away.',
-            style: TextStyle(fontSize: 16, color: Color(0xFF718096)),
+            style: AppStyles.bodyText1.copyWith(
+              color: AppColors.greyTextColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
@@ -346,7 +351,7 @@ class _LoginPageState extends State<LoginPage> {
               setState(() => _isPasswordVisible = !_isPasswordVisible),
           errorText: _passwordErrorText,
         ),
-        const SizedBox(height: 8),
+        // const SizedBox(height: 2),
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
@@ -362,7 +367,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        // const SizedBox(height: 2),
         SizedBox(
           width: double.infinity,
           height: 56,
@@ -380,12 +385,11 @@ class _LoginPageState extends State<LoginPage> {
                     color: Colors.white,
                     strokeWidth: 3,
                   )
-                : const Text(
+                :  Text(
                     'Login',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      style: AppStyles.headline2.copyWith(
+                      color: AppColors.backgroundColor,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
           ),

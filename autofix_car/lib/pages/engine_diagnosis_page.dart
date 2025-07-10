@@ -14,6 +14,10 @@ import '../widgets/record_button_card.dart';
 import '../widgets/diagnosis_result_card.dart'; // Import the new diagnosis result card
 import '../constants/app_colors.dart';
 import '../constants/app_styles.dart';
+import '../models/notification_item.dart';
+import '../services/notification_service.dart';
+import '../models/history_entry.dart';
+import '../services/history_service.dart';
 
 // GlobalKey for navigation - should be defined in main.dart typically
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -26,6 +30,16 @@ class EngineDiagnosisPage extends StatefulWidget {
 }
 
 class _EngineDiagnosisPageState extends State<EngineDiagnosisPage> {
+  // Helper to map string severity to enum
+  Severity? _mapSeverity(dynamic severity) {
+    if (severity == null) return null;
+    final s = severity.toString().toLowerCase();
+    if (s == 'low') return Severity.low;
+    if (s == 'medium') return Severity.medium;
+    if (s == 'high') return Severity.high;
+    if (s == 'critical') return Severity.critical;
+    return null;
+  }
   final audio_record.AudioRecorder _audioRecorder = audio_record.AudioRecorder(); // Fixed: Use AudioRecorder instead of Record
   final AudioPlayer _audioPlayer = AudioPlayer(); // Instance of the audio player
   String? _recordedAudioPath; // Path to the recorded audio file
@@ -276,14 +290,14 @@ class _EngineDiagnosisPageState extends State<EngineDiagnosisPage> {
               {
                 'title': 'How to Diagnose Engine Misfire',
                 'channel': 'Auto Repair Guy',
-                'url': 'https://www.youtube.com/watch?v=R9K7-hP25XU', // Example URL
-                'thumbnail': 'https://img.youtube.com/vi/R9K7-hP25XU/maxresdefault.jpg'
+                'url': 'https://www.youtube.com/watch?v=3Fs7goQcYWk&pp=ygUhdW5kZXJzdGFuZGluZyBjYXIgZmF1bHQgZGlhZ25vc2lz', // Example URL
+                'thumbnail': 'https://img.youtube.com/vi/3Fs7goQcYWk/maxresdefault.jpg'
               },
               {
                 'title': 'Spark Plug Replacement Tutorial (DIY)',
                 'channel': 'Mechanic Man',
-                'url': 'https://www.youtube.com/watch?v=0_u6eC_D4_0', // Example URL
-                'thumbnail': 'https://img.youtube.com/vi/0_u6eC_D4_0/maxresdefault.jpg'
+                'url': 'https://www.youtube.com/watch?v=7Ar7KMAv6FY&pp=ygUidW5kZXJzdGFuZGluZyBjYXIgZGFzaGJvYXJkIGxpZ2h0cw%3D%3D', // Example URL
+                'thumbnail': 'https://img.youtube.com/vi/7Ar7KMAv6FY/maxresdefault.jpg'
               }
             ],
             'isNormal': false
@@ -312,9 +326,47 @@ class _EngineDiagnosisPageState extends State<EngineDiagnosisPage> {
         _isProcessingDiagnosis = false;
       });
 
+      // --- Store as Notification and History ---
+      try {
+      final result = _diagnosisResults.first;
+      final now = DateTime.now();
+      // Notification
+      final notification = NotificationItem(
+      userId: null, // Set userId if you have it, otherwise null for global
+      title: 'Engine Diagnosis: ${result['title']}',
+      message: result['description'] ?? '',
+      timestamp: now,
+      isRead: false,
+      type: 'engine',
+      data: {
+      'severity': result['severity'],
+      'tips': result['tips'],
+      'isNormal': result['isNormal'],
+      },
+      );
+      NotificationService.createNotification(notification);
+      
+      // History
+      final history = HistoryEntry(
+      title: 'Engine Diagnosis: ${result['title']}',
+      description: result['description'] ?? '',
+      details: (result['tips'] as List<dynamic>?)?.join('\n'),
+      type: HistoryType.engine,
+      timestamp: now,
+      severity: _mapSeverity(result['severity']),
+      metadata: {
+      'youtubeVideos': result['youtubeVideos'],
+      'isNormal': result['isNormal'],
+      },
+      );
+      HistoryService.createHistoryEntry(history);
+      } catch (e) {
+      debugPrint('Error saving diagnosis as notification/history: $e');
+      }
+      
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       _showSnackBar('Diagnosis complete! Check results below.', AppColors.successColor);
-    }
+      }
   }
 
   void _recordNewSound() {
@@ -384,7 +436,7 @@ class _EngineDiagnosisPageState extends State<EngineDiagnosisPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const HowItWorksCard(),
+            // const HowItWorksCard(),
 
             // Recording Section
             Center(

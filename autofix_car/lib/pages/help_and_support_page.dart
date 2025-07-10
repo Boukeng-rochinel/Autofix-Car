@@ -1,4 +1,9 @@
 // lib/screens/help_and_support_page.dart
+import 'package:autofix_car/constants/app_colors.dart';
+import 'package:autofix_car/constants/app_styles.dart';
+import 'package:autofix_car/pages/create_faq_form.dart';
+import 'package:autofix_car/pages/create_notification_form.dart';
+import 'package:autofix_car/pages/notification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For SystemUiOverlayStyle
 import 'package:url_launcher/url_launcher.dart'; // For opening YouTube links
@@ -59,23 +64,23 @@ class _HelpAndSupportPageState extends State<HelpAndSupportPage>
     {
       'title': 'Understanding Car Dashboard Lights',
       'thumbnail':
-          'https://img.youtube.com/vi/Dq-O6gY2aAE/mqdefault.jpg', // Replace with actual thumbnail or embed logic
+          'https://img.youtube.com/vi/3Fs7goQcYWk/maxresdefault.jpg', // Replace with actual thumbnail or embed logic
       'url':
-          'https://www.youtube.com/watch?v=Dq-O6gY2aAE', // Replace with actual video ID
+          'https://www.youtube.com/watch?v=3Fs7goQcYWk&pp=ygUhdW5kZXJzdGFuZGluZyBjYXIgZmF1bHQgZGlhZ25vc2lz', // Replace with actual video ID
     },
     {
       'title': 'Basic Car Maintenance Tips',
       'thumbnail':
-          'https://img.youtube.com/vi/W_J16iI8QcM/mqdefault.jpg', // Replace with actual thumbnail
+          'https://img.youtube.com/vi/7Ar7KMAv6FY/maxresdefault.jpg', // Replace with actual thumbnail
       'url':
-          'https://www.youtube.com/watch?v=W_J16iI8QcM', // Replace with actual video ID
+          'https://www.youtube.com/watch?v=7Ar7KMAv6FY&pp=ygUidW5kZXJzdGFuZGluZyBjYXIgZGFzaGJvYXJkIGxpZ2h0cw%3D%3D', // Replace with actual video ID
     },
     {
       'title': 'How to Check Tire Pressure',
       'thumbnail':
-          'https://img.youtube.com/vi/FmmH6fM4f_0/mqdefault.jpg', // Replace with actual thumbnail
+          'https://img.youtube.com/vi/a8N9nLQYqSM/maxresdefault.jpg', // Replace with actual thumbnail
       'url':
-          'https://www.youtube.com/watch?v=FmmH6fM4f_0', // Replace with actual video ID
+          'https://www.youtube.com/watch?v=a8N9nLQYqSM&pp=ygUhdW5kZXJzdGFuZGluZyBjYXIgZmF1bHQgZGlhZ25vc2lz', // Replace with actual video ID
     },
   ];
 
@@ -160,7 +165,7 @@ class _HelpAndSupportPageState extends State<HelpAndSupportPage>
           ),
         ),
       ),
-    
+
       title: const Column(
         children: [
           Text(
@@ -188,14 +193,16 @@ class _HelpAndSupportPageState extends State<HelpAndSupportPage>
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(30),
           ),
           child: IconButton(
             icon: const Icon(Icons.notifications_outlined, color: Colors.white),
             onPressed: () {
               // Navigate to notification page
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationPage()));
-              debugPrint('Navigate to Notification Page');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NotificationPage()),
+              );
             },
           ),
         ),
@@ -308,10 +315,9 @@ class _HelpAndSupportPageState extends State<HelpAndSupportPage>
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 22,
-        fontWeight: FontWeight.w700,
-        color: Color(0xFF1E40AF), // Dark blue for section titles
+      style: AppStyles.headline2.copyWith(
+        color: AppColors.titleColor,
+        fontWeight: FontWeight.bold,
       ),
     );
   }
@@ -528,7 +534,8 @@ class _HelpAndSupportPageState extends State<HelpAndSupportPage>
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => _launchUrl('mailto:support@yourdomain.com'),
+                  onPressed: () =>
+                      _launchUrl('mailto:boukengrochinel15@gmail.com'),
                   icon: const Icon(Icons.email, color: Color(0xFF3B82F6)),
                   label: const Text('Email Us'),
                   style: OutlinedButton.styleFrom(
@@ -546,10 +553,16 @@ class _HelpAndSupportPageState extends State<HelpAndSupportPage>
                 child: ElevatedButton.icon(
                   onPressed: () {
                     // Navigate to a chat page or external chat link
-                    debugPrint('Open Live Chat');
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Live chat feature coming soon!'),
+                    // debugPrint('Open Live Chat');
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   const SnackBar(
+                    //     content: Text('Live chat feature coming soon!'),
+                    //   ),
+                    // );
+                       Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateNotificationForm(),
                       ),
                     );
                   },
@@ -558,6 +571,39 @@ class _HelpAndSupportPageState extends State<HelpAndSupportPage>
                     color: Colors.white,
                   ),
                   label: const Text('Live Chat'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3B82F6),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12,),
+                 Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // Navigate to a chat page or external chat link
+                    // debugPrint('Open Live Chat');
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   const SnackBar(
+                    //     content: Text('Live chat feature coming soon!'),
+                    //   ),
+                    // );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateFaqForm(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.chat_bubble_outline,
+                    color: Colors.white,
+                  ),
+                  label: const Text('Create Faqs'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF3B82F6),
                     foregroundColor: Colors.white,
@@ -601,11 +647,14 @@ class _HelpAndSupportPageState extends State<HelpAndSupportPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.info_outline, size: 48, color: Colors.grey[400]),
-            const SizedBox(height: 16),
+            Icon(Icons.info_outline, size: 30, color: Colors.grey[400]),
+            const SizedBox(height: 11),
             Text(
               message,
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              style: AppStyles.bodyText.copyWith(
+                color: AppColors.greyTextColor,
+                fontSize: AppStyles.bodyText1.fontSize,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

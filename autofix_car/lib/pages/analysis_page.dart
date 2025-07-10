@@ -1,10 +1,17 @@
+import 'package:autofix_car/constants/app_styles.dart';
 import 'package:autofix_car/pages/dashboard_light_scanning_page.dart';
 import 'package:autofix_car/pages/engine_diagnosis_page.dart';
+import 'package:autofix_car/pages/notification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:autofix_car/constants/app_colors.dart';
 import 'package:autofix_car/widgets/diagnostic_card.dart';
 import './manual_fault_entry_page.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+import 'package:intl/intl.dart';
 
 class AnalysisPage extends StatefulWidget {
   const AnalysisPage({super.key});
@@ -114,14 +121,19 @@ class _AnalysisPageState extends State<AnalysisPage>
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(30),
           ),
           child: IconButton(
             icon: const Icon(
               Icons.notifications_none_rounded,
               color: Colors.white,
             ),
-            onPressed: () => _showNotifications(context),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NotificationPage()),
+              );
+            },
           ),
         ),
       ],
@@ -136,7 +148,7 @@ class _AnalysisPageState extends State<AnalysisPage>
           child: Column(
             children: [
               _buildWelcomeSection(context),
-              _buildQuickStats(context),
+              // _buildQuickStats(context),
               _buildDiagnosticMethods(context),
               _buildSmartInsights(context),
               _buildHealthDashboard(context),
@@ -176,12 +188,12 @@ class _AnalysisPageState extends State<AnalysisPage>
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.analytics_outlined,
                   color: Colors.white,
-                  size: 28,
+                  size: 18,
                 ),
               ),
               const Spacer(),
@@ -193,7 +205,14 @@ class _AnalysisPageState extends State<AnalysisPage>
                 decoration: BoxDecoration(
                   color: Colors.green.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.green.withOpacity(0.3)),
+                  border: Border.all(
+                    color: const Color.fromARGB(
+                      255,
+                      105,
+                      247,
+                      110,
+                    ).withOpacity(0.3),
+                  ),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
@@ -214,22 +233,19 @@ class _AnalysisPageState extends State<AnalysisPage>
             ],
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Choose Your Diagnostic Method',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
+            style: AppStyles.headline2.copyWith(
+              color: AppColors.backgroundColor,
               fontWeight: FontWeight.bold,
-              letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             'Select the most appropriate method based on your vehicle\'s symptoms and current condition',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 16,
-              height: 1.4,
+            style: AppStyles.bodyText.copyWith(
+              color: AppColors.backgroundColor,
+              fontSize: AppStyles.bodyText2.fontSize,
             ),
           ),
         ],
@@ -237,107 +253,106 @@ class _AnalysisPageState extends State<AnalysisPage>
     );
   }
 
-  Widget _buildQuickStats(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildStatCard(
-              'Last Scan',
-              '2 hours ago',
-              Icons.schedule,
-              Colors.blue,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _buildStatCard(
-              'Issues Found',
-              '0 Critical',
-              Icons.verified_user,
-              Colors.green,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _buildStatCard(
-              'Next Service',
-              '45 days',
-              Icons.build_circle,
-              Colors.orange,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildQuickStats(BuildContext context) {
+  //   return Container(
+  //     margin: const EdgeInsets.symmetric(horizontal: 20),
+  //     child: Row(
+  //       children: [
+  //         Expanded(
+  //           child: _buildStatCard(
+  //             'Last Scan',
+  //             '2 hours ago',
+  //             Icons.schedule,
+  //             Colors.blue,
+  //           ),
+  //         ),
+  //         const SizedBox(width: 12),
+  //         Expanded(
+  //           child: _buildStatCard(
+  //             'Issues Found',
+  //             '0 Critical',
+  //             Icons.verified_user,
+  //             Colors.green,
+  //           ),
+  //         ),
+  //         const SizedBox(width: 12),
+  //         Expanded(
+  //           child: _buildStatCard(
+  //             'Next Service',
+  //             '45 days',
+  //             Icons.build_circle,
+  //             Colors.orange,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildStatCard(
+  //   String title,
+  //   String value,
+  //   IconData icon,
+  //   Color color,
+  // ) {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(16),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.black.withOpacity(0.05),
+  //           blurRadius: 10,
+  //           offset: const Offset(0, 4),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Column(
+  //       children: [
+  //         Container(
+  //           padding: const EdgeInsets.all(8),
+  //           decoration: BoxDecoration(
+  //             color: color.withOpacity(0.1),
+  //             borderRadius: BorderRadius.circular(12),
+  //           ),
+  //           child: Icon(icon, color: color, size: 20),
+  //         ),
+  //         const SizedBox(height: 8),
+  //         Text(
+  //           value,
+  //           style: const TextStyle(
+  //             fontSize: 14,
+  //             fontWeight: FontWeight.bold,
+  //             color: Colors.black87,
+  //           ),
+  //         ),
+  //         Text(
+  //           title,
+  //           style: TextStyle(
+  //             fontSize: 11,
+  //             color: Colors.grey[600],
+  //             fontWeight: FontWeight.w500,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildDiagnosticMethods(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 32, 20, 16),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
           child: Row(
             children: [
-              const Text(
+              Text(
                 'Diagnostic Methods',
-                style: TextStyle(
-                  fontSize: 22,
+                style: AppStyles.headline2.copyWith(
+                  color: AppColors.titleColor,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
                 ),
               ),
               const Spacer(),
@@ -473,57 +488,60 @@ class _AnalysisPageState extends State<AnalysisPage>
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Icon(icon, color: Colors.white, size: 32),
+                        child: Icon(icon, color: Colors.white, size: 20),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 15),
                       Text(
                         title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
+                        style: AppStyles.headline2.copyWith(
+                          color: AppColors.backgroundColor,
                           fontWeight: FontWeight.bold,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                        style: AppStyles.bodyText.copyWith(
+                          color: AppColors.backgroundColor,
+                          fontSize: AppStyles.bodyText2.fontSize,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         description,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 14,
-                          height: 1.4,
+                        style: AppStyles.bodyText.copyWith(
+                          color: AppColors.backgroundColor,
+                          fontSize: AppStyles.bodyText2.fontSize,
                         ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const Spacer(),
+                      const SizedBox(height: 16),
                       Row(
                         children: [
                           const Text(
                             'Start Analysis',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(
                               Icons.arrow_forward,
                               color: Colors.white,
-                              size: 20,
+                              size: 17,
                             ),
                           ),
                         ],
@@ -559,33 +577,35 @@ class _AnalysisPageState extends State<AnalysisPage>
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF3B82F6).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  Icons.lightbulb_outline,
-                  color: Color(0xFF3B82F6),
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              const Column(
+              // Container(
+              //   padding: const EdgeInsets.all(12),
+              //   decoration: BoxDecoration(
+              //     color: const Color(0xFF3B82F6).withOpacity(0.1),
+              //     borderRadius: BorderRadius.circular(16),
+              //   ),
+              //   child: const Icon(
+              //     Icons.lightbulb_outline,
+              //     color: Color(0xFF3B82F6),
+              //     size: 24,
+              //   ),
+              // ),
+              // const SizedBox(width: 16),
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Smart Recommendations',
-                    style: TextStyle(
-                      fontSize: 18,
+                    style: AppStyles.headline2.copyWith(
+                      color: AppColors.titleColor,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
                     ),
                   ),
                   Text(
                     'AI-powered suggestions',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                    style: AppStyles.bodyText.copyWith(
+                      color: AppColors.greyTextColor,
+                      fontSize: AppStyles.bodyText1.fontSize,
+                    ),
                   ),
                 ],
               ),
@@ -688,41 +708,49 @@ class _AnalysisPageState extends State<AnalysisPage>
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.green.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.health_and_safety_outlined,
                   color: Colors.green,
-                  size: 24,
+                  size: 16,
                 ),
               ),
               const SizedBox(width: 16),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Vehicle Health Status',
-                      style: TextStyle(
-                        fontSize: 18,
+                      style: AppStyles.headline2.copyWith(
+                        color: AppColors.titleColor,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
                       ),
                     ),
                     Text(
                       'Overall condition: Excellent',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.green,
-                        fontWeight: FontWeight.w500,
+                      style: AppStyles.bodyText1.copyWith(
+                        color: AppColors.successColor,
+                        // fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
               ),
-              TextButton(
-                onPressed: () => _showFullReport(context),
-                child: const Text('View Report'),
+              PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, color: Colors.grey),
+              onSelected: (value) async {
+              if (value == 'download') {
+              await _downloadReport(context);
+              }
+              },
+              itemBuilder: (context) => [
+              const PopupMenuItem<String>(
+              value: 'download',
+              child: Text('Download Report'),
+              ),
+              ],
               ),
             ],
           ),
@@ -845,13 +873,59 @@ class _AnalysisPageState extends State<AnalysisPage>
     );
   }
 
-  void _showFullReport(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Loading comprehensive health report...'),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+
+  
+  Future<void> _downloadReport(BuildContext context) async {
+  try {
+  // Replace with actual user info if available
+  final String userName = 'John Doe';
+  final String userEmail = 'john.doe@email.com';
+  final String date = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
+  final String overallStatus = 'Engine: 95%\nTransmission: 92%\nBrakes: 88%\nOverall: Excellent';
+  
+  final pdf = pw.Document();
+  pdf.addPage(
+  pw.Page(
+  build: (pw.Context context) => pw.Column(
+  crossAxisAlignment: pw.CrossAxisAlignment.start,
+  children: [
+  pw.Text('AutoFix Car Health Report', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+  pw.SizedBox(height: 16),
+  pw.Text('User: $userName', style: pw.TextStyle(fontSize: 16)),
+  pw.Text('Email: $userEmail', style: pw.TextStyle(fontSize: 16)),
+  pw.Text('Date: $date', style: pw.TextStyle(fontSize: 16)),
+  pw.SizedBox(height: 24),
+  pw.Text('Overall Health Status:', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+  pw.SizedBox(height: 8),
+  pw.Text(overallStatus, style: pw.TextStyle(fontSize: 16)),
+  ],
+  ),
+  ),
+  );
+  
+  final output = await getApplicationDocumentsDirectory();
+  final file = File('${output.path}/autofix_car_health_report.pdf');
+  await file.writeAsBytes(await pdf.save());
+  
+  if (context.mounted) {
+  ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(
+  content: Text('PDF saved to: ${file.path}'),
+  behavior: SnackBarBehavior.floating,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  ),
+  );
+  }
+  } catch (e) {
+  if (context.mounted) {
+  ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(
+  content: Text('Failed to save PDF: $e'),
+  behavior: SnackBarBehavior.floating,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  ),
+  );
+  }
+  }
   }
 }
