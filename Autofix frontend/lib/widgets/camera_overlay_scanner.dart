@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'dart:io';
+// import 'dart:io';
 import '../pages/scanning_result_page.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_styles.dart';

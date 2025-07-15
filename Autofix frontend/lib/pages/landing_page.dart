@@ -1,9 +1,9 @@
-// pages/login_page.dart (Landing Page)
 import 'package:flutter/material.dart';
 import '../widgets/dashboard_header_copy.dart';
-import 'register_page.dart';
 import 'welcome_page.dart';
-// import 'package:easy_localization/easy_localization.dart'; // Removed
+import 'package:easy_localization/easy_localization.dart';
+import '../constants/app_colors.dart';
+import '../constants/app_styles.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -24,7 +24,7 @@ class _LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1E3A5F),
+      backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -52,23 +52,22 @@ class _LandingPageState extends State<LandingPage> {
                       // Title
                       Center(
                         child: Text(
-                          'Choose your preferred language to continue', // Hardcoded
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Color(0xFF718096),
+                          'choose_language'.tr(),
+                          style: AppStyles.bodyText1.copyWith(
+                            color: AppColors.greyTextColor,
                           ),
                         ),
                       ),
 
                       const SizedBox(height: 16),
 
-                      // English
+                      // English Button
                       SizedBox(
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
                           onPressed: () async {
-                            // await context.setLocale(const Locale('en')); // Removed
+                            await context.setLocale(const Locale('en'));
                             _handleNext();
                           },
                           style: ElevatedButton.styleFrom(
@@ -78,25 +77,21 @@ class _LandingPageState extends State<LandingPage> {
                             ),
                             elevation: 0,
                           ),
-                          child: const Text(
-                            // Hardcoded
-                            'English',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
+                          child: Text(
+                            'english'.tr(),
+                            style: AppStyles.buttonText,
                           ),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      // French
+
+                      // French Button
                       SizedBox(
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
                           onPressed: () async {
-                            // await context.setLocale(const Locale('fr')); // Removed
+                            await context.setLocale(const Locale('fr'));
                             _handleNext();
                           },
                           style: ElevatedButton.styleFrom(
@@ -106,14 +101,9 @@ class _LandingPageState extends State<LandingPage> {
                             ),
                             elevation: 0,
                           ),
-                          child: const Text(
-                            // Hardcoded
-                            'French',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
+                          child: Text(
+                            'french'.tr(),
+                            style: AppStyles.buttonText,
                           ),
                         ),
                       ),

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart'; // For date formatting
 
 import '../models/notification_item.dart';
 import '../services/notification_service.dart';
+import '../services/token_manager.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -21,7 +22,7 @@ class _NotificationPageState extends State<NotificationPage>
 
   // TODO: Replace with actual userId fetching logic
   // If userId is null, notifications are for everyone
-  final String? userId = null; // or fetch from auth provider
+  // final String? userId = null;
 
   List<NotificationItem> _allNotifications = [];
   bool _isLoading = true;
@@ -61,7 +62,12 @@ class _NotificationPageState extends State<NotificationPage>
   Future<void> _loadNotifications() async {
     setState(() => _isLoading = true);
     try {
-      _allNotifications = await NotificationService.getMyNotifications(userId ?? '');
+      final String? userId =
+          await TokenManager.getUid(); // or fetch from auth provider
+
+      _allNotifications = await NotificationService.getMyNotifications(
+        userId ?? '',
+      );
       // Sort notifications by timestamp, newest first
       _allNotifications.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     } catch (e) {
@@ -82,7 +88,11 @@ class _NotificationPageState extends State<NotificationPage>
     if (notification.isRead) return; // Already read
 
     try {
-      await NotificationService.markNotificationAsRead(userId ?? '', notification.id!);
+      final String? userId = await TokenManager.getUid();
+      await NotificationService.markNotificationAsRead(
+        userId ?? '',
+        notification.id!,
+      );
       setState(() {
         final index = _allNotifications.indexOf(notification);
         if (index != -1) {
@@ -123,7 +133,11 @@ class _NotificationPageState extends State<NotificationPage>
 
     if (confirmed == true && notification.id != null) {
       try {
-        await NotificationService.deleteNotification(userId ?? '', notification.id!);
+        final String? userId = await TokenManager.getUid();
+        await NotificationService.deleteNotification(
+          userId ?? '',
+          notification.id!,
+        );
         setState(() {
           _allNotifications.removeWhere((item) => item.id == notification.id);
         });
@@ -691,11 +705,15 @@ class _NotificationPageState extends State<NotificationPage>
     }
 
     try {
+      final String? userId = await TokenManager.getUid();
       // In a real app, you'd want a single backend endpoint for this
       // For now, we iterate and call the existing markAsRead
       for (final notification in unreadNotifications) {
         if (notification.id != null) {
-          await NotificationService.markNotificationAsRead(userId ?? '', notification.id!);
+          await NotificationService.markNotificationAsRead(
+            userId ?? '',
+            notification.id!,
+          );
         }
       }
       _loadNotifications(); // Reload to update UI
@@ -744,10 +762,14 @@ class _NotificationPageState extends State<NotificationPage>
 
   void _clearAllNotifications() async {
     try {
+      final String? userId = await TokenManager.getUid();
       // Again, a single backend endpoint for this would be better
       for (final notification in List.from(_allNotifications)) {
         if (notification.id != null) {
-          await NotificationService.deleteNotification(userId ?? '', notification.id!);
+          await NotificationService.deleteNotification(
+            userId ?? '',
+            notification.id!,
+          );
         }
       }
       _loadNotifications(); // Reload data

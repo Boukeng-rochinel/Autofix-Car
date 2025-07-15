@@ -2,8 +2,11 @@
 import 'package:autofix_car/constants/app_colors.dart';
 import 'package:autofix_car/constants/app_styles.dart';
 import 'package:autofix_car/pages/forgot_password_page.dart';
+import 'package:autofix_car/pages/landing_page.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/social_login_button.dart';
 import '../widgets/dashboard_header.dart';
@@ -262,6 +265,22 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF1E3A5F),
+       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle
+            .dark, // For dark status bar icons on light background
+        leading: IconButton(
+          // ADDED: Back button
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LandingPage()),
+            );
+          },
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -309,7 +328,7 @@ class _LoginPageState extends State<LoginPage> {
       children: [
         Center(
           child: Text(
-            'AutoFix car',
+            'Autofix Car'.tr(),
             style: AppStyles.headline2.copyWith(
               color: AppColors.titleColor,
               fontWeight: FontWeight.bold,
@@ -319,7 +338,7 @@ class _LoginPageState extends State<LoginPage> {
         SizedBox(height: 8),
         Center(
           child: Text(
-            'Your next service is just a tap away.',
+            'Your next service is just a tap away.'.tr(),
             style: AppStyles.bodyText1.copyWith(
               color: AppColors.greyTextColor,
               fontWeight: FontWeight.bold,
@@ -335,7 +354,7 @@ class _LoginPageState extends State<LoginPage> {
       children: [
         CustomTextField(
           controller: _emailController,
-          hintText: 'Email Address',
+          hintText: 'email_address'.tr(),
           prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           errorText: _emailErrorText,
@@ -343,7 +362,7 @@ class _LoginPageState extends State<LoginPage> {
         const SizedBox(height: 16),
         CustomTextField(
           controller: _passwordController,
-          hintText: 'Password',
+          hintText: 'password'.tr(),
           prefixIcon: Icons.lock_outline,
           isPassword: true,
           isPasswordVisible: _isPasswordVisible,
@@ -361,9 +380,9 @@ class _LoginPageState extends State<LoginPage> {
                 builder: (context) => const ForgotPasswordPage(),
               ),
             ),
-            child: const Text(
-              'Forgot Password?',
-              style: TextStyle(color: Color(0xFF3182CE), fontSize: 14),
+            child: Text(
+              'forgot_password'.tr(),
+              style: AppStyles.bodyText2.copyWith(color: AppColors.primaryColor),
             ),
           ),
         ),
@@ -374,7 +393,7 @@ class _LoginPageState extends State<LoginPage> {
           child: ElevatedButton(
             onPressed: _isAuthenticating ? null : _validateAndLogin,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3182CE),
+              backgroundColor: AppColors.primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -386,7 +405,7 @@ class _LoginPageState extends State<LoginPage> {
                     strokeWidth: 3,
                   )
                 :  Text(
-                    'Login',
+                    'login'.tr(),
                       style: AppStyles.headline2.copyWith(
                       color: AppColors.backgroundColor,
                       fontWeight: FontWeight.bold,
@@ -418,31 +437,31 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildSocialLogin() {
     return Column(
       children: [
-        const Row(
+        Row(
           children: [
-            Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+            const Expanded(child: Divider(color: AppColors.dividerColor)),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'or login with',
-                style: TextStyle(color: Color(0xFF718096), fontSize: 14),
+                'or_login_with'.tr(),
+                style: AppStyles.bodyText2.copyWith(color: AppColors.greyTextColor),
               ),
             ),
-            Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+            const Expanded(child: Divider(color: AppColors.dividerColor)),
           ],
         ),
         const SizedBox(height: 20),
         SocialLoginButton(
           icon: 'assets/google_icon.png',
-          text: 'Login with Google',
+          text: 'login_with_google'.tr(),
           onPressed: _signInWithGoogle,
         ),
         const SizedBox(height: 12),
         SocialLoginButton(
           icon: 'assets/apple_icon.png',
-          text: 'Login with Apple',
+          text: 'login_with_apple'.tr(),
           onPressed: () =>
-              _showSnackBar('Apple login not yet implemented.', Colors.grey),
+              _showSnackBar('apple_login_not_implemented'.tr(), Colors.grey),
         ),
       ],
     );
@@ -452,17 +471,16 @@ class _LoginPageState extends State<LoginPage> {
     return Center(
       child: RichText(
         text: TextSpan(
-          text: 'Don\'t have an account? ',
-          style: const TextStyle(color: Color(0xFF718096), fontSize: 14),
+          text: 'dont_have_account'.tr(),
+          style: AppStyles.bodyText2.copyWith(color: AppColors.greyTextColor),
           children: [
             WidgetSpan(
               child: GestureDetector(
                 onTap: _registerRedirect,
-                child: const Text(
-                  'Register',
-                  style: TextStyle(
-                    color: Color(0xFF3182CE),
-                    fontSize: 14,
+                child: Text(
+                  'register'.tr(),
+                  style: AppStyles.bodyText2.copyWith(
+                    color: AppColors.primaryColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

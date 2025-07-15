@@ -1,9 +1,9 @@
-// main.dart
 import 'package:flutter/material.dart';
 import 'package:autofix_car/constants/app_colors.dart';
 import 'package:autofix_car/constants/app_styles.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'package:autofix_car/pages/landing_page.dart';
 import 'package:autofix_car/pages/main_navigation.dart';
@@ -13,13 +13,19 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables from .env file
   await dotenv.load(fileName: ".env");
-
-  // Initialize Firebase Core
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  await EasyLocalization.ensureInitialized();
 
-  runApp(const AutoFixApp());
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('fr')],
+      path: 'assets/l10n',
+      fallbackLocale: const Locale('en'),
+      child: const AutoFixApp(),
+    ),
+  );
 }
 
 class AutoFixApp extends StatelessWidget {
@@ -33,6 +39,9 @@ class AutoFixApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'AutoFix',
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       theme: ThemeData(
         primarySwatch: AppColors.primaryMaterialColor,
         scaffoldBackgroundColor: AppColors.backgroundColor,
@@ -46,10 +55,6 @@ class AutoFixApp extends StatelessWidget {
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      // Removed easy_localization specific properties:
-      // localizationsDelegates: context.localizationDelegates,
-      // supportedLocales: context.supportedLocales,
-      // locale: context.locale,
       home: FutureBuilder<bool>(
         future: _checkLoginStatus(),
         builder: (context, snapshot) {

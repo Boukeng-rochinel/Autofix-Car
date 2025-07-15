@@ -1,5 +1,6 @@
 // pages/main_navigation.dart
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'home_page.dart';
 import 'history_page.dart';
 import 'profile_page.dart';
@@ -59,31 +60,31 @@ class _MainNavigationState extends State<MainNavigation> {
           unselectedItemColor: Colors.grey,
           selectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
           unselectedLabelStyle: const TextStyle(fontSize: 12),
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
+              icon: const Icon(Icons.home_outlined),
+              activeIcon: const Icon(Icons.home),
+              label: 'home'.tr(),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.build_outlined),
-              activeIcon: Icon(Icons.build),
-              label: 'mechanics',
+              icon: const Icon(Icons.build_outlined),
+              activeIcon: const Icon(Icons.build),
+              label: 'mechanics'.tr(),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.analytics_outlined),
-              activeIcon: Icon(Icons.analytics),
-              label: 'analysis',
+              icon: const Icon(Icons.analytics_outlined),
+              activeIcon: const Icon(Icons.analytics),
+              label: 'analysis'.tr(),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.history_outlined),
-              activeIcon: Icon(Icons.history),
-              label: 'history',
+              icon: const Icon(Icons.history_outlined),
+              activeIcon: const Icon(Icons.history),
+              label: 'history'.tr(),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.help_outline),
-              activeIcon: Icon(Icons.help),
-              label: 'Help',
+              icon: const Icon(Icons.help_outline),
+              activeIcon: const Icon(Icons.help),
+              label: 'help_support'.tr(),
             ),
           ],
         ),

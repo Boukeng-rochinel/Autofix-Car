@@ -7,6 +7,7 @@ import 'package:autofix_car/pages/forgot_password_page.dart';
 import 'package:autofix_car/pages/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // Keep if used elsewhere, not directly used in this snippet's logic
+import 'package:easy_localization/easy_localization.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/social_login_button.dart';
 import '../widgets/dashboard_header.dart';
@@ -228,7 +229,7 @@ class _RegisterPageState extends State<RegisterPage> {
       children: [
         Center(
           child: Text(
-            'Create Account',
+            'create_account'.tr(),
             style: AppStyles.headline2.copyWith(
               color: AppColors.titleColor,
               fontWeight: FontWeight.bold,
@@ -238,7 +239,7 @@ class _RegisterPageState extends State<RegisterPage> {
         SizedBox(height: 8),
         Center(
           child: Text(
-            'Start your journey with AutoFix.',
+            'start_journey'.tr(),
             style: AppStyles.bodyText1.copyWith(
               color: AppColors.greyTextColor,
               fontWeight: FontWeight.bold,
@@ -254,7 +255,7 @@ class _RegisterPageState extends State<RegisterPage> {
       children: [
         CustomTextField(
           controller: _emailController,
-          hintText: 'Email Address',
+          hintText: 'email_address'.tr(),
           prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           errorText: _emailErrorText,
@@ -262,7 +263,7 @@ class _RegisterPageState extends State<RegisterPage> {
         const SizedBox(height: 16),
         CustomTextField(
           controller: _passwordController,
-          hintText: 'Password',
+          hintText: 'password'.tr(),
           prefixIcon: Icons.lock_outline,
           isPassword: true,
           isPasswordVisible: _isPasswordVisible,
@@ -277,7 +278,7 @@ class _RegisterPageState extends State<RegisterPage> {
           child: ElevatedButton(
             onPressed: _isRegistering ? null : _validateAndRegister,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3182CE),
+              backgroundColor: AppColors.primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -289,7 +290,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     strokeWidth: 3,
                   )
                 : Text(
-                    'Register',
+                    'register'.tr(),
                     style: AppStyles.headline2.copyWith(
                       color: AppColors.backgroundColor,
                       fontWeight: FontWeight.bold,
@@ -321,31 +322,31 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget _buildSocialLogin() {
     return Column(
       children: [
-        const Row(
+        Row(
           children: [
-            Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+            Expanded(child: Divider(color: Colors.grey)),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'or register with',
-                style: TextStyle(color: Color(0xFF718096), fontSize: 14),
+                'or_register_with'.tr(),
+                style: AppStyles.bodyText2.copyWith(color: AppColors.greyTextColor),
               ),
             ),
-            Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+            Expanded(child: Divider(color: Colors.grey)),
           ],
         ),
         const SizedBox(height: 20),
         SocialLoginButton(
           icon: 'assets/google_icon.png',
-          text: 'Register with Google',
+          text: 'register_with_google'.tr(),
           onPressed: _signInWithGoogle,
         ),
         const SizedBox(height: 12),
         SocialLoginButton(
           icon: 'assets/apple_icon.png',
-          text: 'Register with Apple',
+          text: 'register_with_apple'.tr(),
           onPressed: () =>
-              _showSnackBar('Apple login not yet implemented.', Colors.grey),
+              _showSnackBar('apple_login_not_implemented'.tr(), Colors.grey),
         ),
       ],
     );
@@ -355,17 +356,16 @@ class _RegisterPageState extends State<RegisterPage> {
     return Center(
       child: RichText(
         text: TextSpan(
-          text: 'Already have an account? ',
-          style: const TextStyle(color: Color(0xFF718096), fontSize: 14),
+          text: 'already_have_account'.tr(),
+          style: AppStyles.bodyText2.copyWith(color: AppColors.greyTextColor),
           children: [
             WidgetSpan(
               child: GestureDetector(
                 onTap: _loginRedirect,
-                child: const Text(
-                  'Login',
-                  style: TextStyle(
-                    color: Color(0xFF3182CE),
-                    fontSize: 14,
+                child: Text(
+                  'login'.tr(),
+                  style: AppStyles.bodyText2.copyWith(
+                    color: AppColors.primaryColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

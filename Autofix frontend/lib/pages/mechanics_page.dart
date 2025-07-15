@@ -1,8 +1,10 @@
 import 'package:autofix_car/pages/notification_page.dart';
+import 'package:autofix_car/services/token_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../models/mechanic.dart';
 import '../services/mechanic_service.dart';
@@ -85,9 +87,10 @@ class _MechanicsPageState extends State<MechanicsPage>
     String action,
     Mechanic mechanic,
   ) async {
+    final String userId = await TokenManager.getUid() ?? '';
     try {
       final notification = NotificationItem(
-        userId: null,
+        userId: userId,
         title: 'Mechanic ${action == 'call' ? 'Call' : 'Message'}',
         message:
             'You ${action == 'call' ? 'called' : 'messaged'} ${mechanic.name} (${mechanic.phone})',

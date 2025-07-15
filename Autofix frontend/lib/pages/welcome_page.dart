@@ -2,6 +2,7 @@
 import 'package:autofix_car/pages/landing_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For SystemUiOverlayStyle
+import 'package:easy_localization/easy_localization.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_styles.dart';
 import 'login_page.dart'; // Assuming you will have a login page
@@ -55,7 +56,7 @@ class WelcomePage extends StatelessWidget {
 
               // App Name
               Text(
-                'AutoFix car',
+                'app_name'.tr(),
                 style: AppStyles.headline1.copyWith(color: AppColors.textColor),
                 textAlign: TextAlign.center,
               ),
@@ -63,7 +64,7 @@ class WelcomePage extends StatelessWidget {
 
               // Tagline
               Text(
-                'Diagnose your car fault with peace of mind.',
+                'app_tagline'.tr(),
                 style: AppStyles.bodyText1.copyWith(color: AppColors.greyTextColor),
                 textAlign: TextAlign.center,
               ),
@@ -88,7 +89,7 @@ class WelcomePage extends StatelessWidget {
                   elevation: 5,
                 ),
                 child: Text(
-                  'Login',
+                  'login'.tr(),
                   style: AppStyles.buttonText,
                 ),
               ),
@@ -113,7 +114,7 @@ class WelcomePage extends StatelessWidget {
                   elevation: 0, // No shadow for outlined button
                 ),
                 child: Text(
-                  'Register',
+                  'register'.tr(),
                   style: AppStyles.buttonText.copyWith(color: AppColors.primaryColor),
                 ),
               ),

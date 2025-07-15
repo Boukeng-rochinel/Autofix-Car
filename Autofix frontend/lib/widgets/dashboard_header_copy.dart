@@ -9,7 +9,7 @@ class DashboardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 250,
+      height: 550,
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(

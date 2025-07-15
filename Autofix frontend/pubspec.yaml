@@ -96,9 +96,9 @@ flutter:
     - assets/images/
     - assets/images/profile_pic.png
     - assets/icons/
-    # - assets/l10n/fr.json
-    # - assets/l10n/
-    # - l10n/
+    - assets/l10n/
+    - assets/l10n/en.json
+    - assets/l10n/fr.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

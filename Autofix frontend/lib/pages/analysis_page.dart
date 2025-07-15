@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class AnalysisPage extends StatefulWidget {
   const AnalysisPage({super.key});
@@ -21,34 +22,20 @@ class AnalysisPage extends StatefulWidget {
 }
 
 class _AnalysisPageState extends State<AnalysisPage>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.8, curve: Curves.easeOut),
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
-          ),
-        );
-
     _animationController.forward();
   }
 
@@ -58,62 +45,46 @@ class _AnalysisPageState extends State<AnalysisPage>
     super.dispose();
   }
 
+  void _navigateToPage(BuildContext context, Widget page) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => page),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: _buildModernAppBar(context),
-      body: AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) {
-          return FadeTransition(
-            opacity: _fadeAnimation,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: _buildBody(context),
-            ),
-          );
-        },
+      backgroundColor: AppColors.backgroundColor,
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            _buildSliverAppBar(context),
+            SliverToBoxAdapter(child: _buildBody(context)),
+          ],
+        ),
       ),
     );
   }
 
-  PreferredSizeWidget _buildModernAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      systemOverlayStyle: SystemUiOverlayStyle.dark,
-      toolbarHeight: 70,
-      flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1E40AF), Color(0xFF3B82F6), Color(0xFF60A5FA)],
+  Widget _buildSliverAppBar(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 120,
+      floating: false,
+      pinned: true,
+      backgroundColor: const Color(0xFF1E3A5F),
+      flexibleSpace: FlexibleSpaceBar(
+        title: Text(
+          'analysis'.tr(),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
         ),
-      ),
-
-      title: const Column(
-        children: [
-          Text(
-            'Vehicle Analysis',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
-            ),
-          ),
-          Text(
-            'Professional Diagnostics',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ],
+        centerTitle: true,
       ),
       centerTitle: true,
       actions: [
@@ -148,7 +119,6 @@ class _AnalysisPageState extends State<AnalysisPage>
           child: Column(
             children: [
               _buildWelcomeSection(context),
-              // _buildQuickStats(context),
               _buildDiagnosticMethods(context),
               _buildSmartInsights(context),
               _buildHealthDashboard(context),
@@ -166,86 +136,36 @@ class _AnalysisPageState extends State<AnalysisPage>
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
+          colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF667EEA).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.analytics_outlined,
-                  color: Colors.white,
-                  size: 18,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color.fromARGB(
-                      255,
-                      105,
-                      247,
-                      110,
-                    ).withOpacity(0.3),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.green, size: 16),
-                    SizedBox(width: 4),
-                    Text(
-                      'All Systems Good',
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
           Text(
-            'Choose Your Diagnostic Method',
-            style: AppStyles.headline2.copyWith(
-              color: AppColors.backgroundColor,
+            'comprehensive_analysis'.tr(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
-            'Select the most appropriate method based on your vehicle\'s symptoms and current condition',
-            style: AppStyles.bodyText.copyWith(
-              color: AppColors.backgroundColor,
-              fontSize: AppStyles.bodyText2.fontSize,
+            'ai_powered_diagnostics_description'.tr(),
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 16,
             ),
           ),
         ],
@@ -253,171 +173,69 @@ class _AnalysisPageState extends State<AnalysisPage>
     );
   }
 
-  // Widget _buildQuickStats(BuildContext context) {
-  //   return Container(
-  //     margin: const EdgeInsets.symmetric(horizontal: 20),
-  //     child: Row(
-  //       children: [
-  //         Expanded(
-  //           child: _buildStatCard(
-  //             'Last Scan',
-  //             '2 hours ago',
-  //             Icons.schedule,
-  //             Colors.blue,
-  //           ),
-  //         ),
-  //         const SizedBox(width: 12),
-  //         Expanded(
-  //           child: _buildStatCard(
-  //             'Issues Found',
-  //             '0 Critical',
-  //             Icons.verified_user,
-  //             Colors.green,
-  //           ),
-  //         ),
-  //         const SizedBox(width: 12),
-  //         Expanded(
-  //           child: _buildStatCard(
-  //             'Next Service',
-  //             '45 days',
-  //             Icons.build_circle,
-  //             Colors.orange,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildStatCard(
-  //   String title,
-  //   String value,
-  //   IconData icon,
-  //   Color color,
-  // ) {
-  //   return Container(
-  //     padding: const EdgeInsets.all(16),
-  //     decoration: BoxDecoration(
-  //       color: Colors.white,
-  //       borderRadius: BorderRadius.circular(16),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.black.withOpacity(0.05),
-  //           blurRadius: 10,
-  //           offset: const Offset(0, 4),
-  //         ),
-  //       ],
-  //     ),
-  //     child: Column(
-  //       children: [
-  //         Container(
-  //           padding: const EdgeInsets.all(8),
-  //           decoration: BoxDecoration(
-  //             color: color.withOpacity(0.1),
-  //             borderRadius: BorderRadius.circular(12),
-  //           ),
-  //           child: Icon(icon, color: color, size: 20),
-  //         ),
-  //         const SizedBox(height: 8),
-  //         Text(
-  //           value,
-  //           style: const TextStyle(
-  //             fontSize: 14,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.black87,
-  //           ),
-  //         ),
-  //         Text(
-  //           title,
-  //           style: TextStyle(
-  //             fontSize: 11,
-  //             color: Colors.grey[600],
-  //             fontWeight: FontWeight.w500,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget _buildDiagnosticMethods(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          child: Row(
-            children: [
-              Text(
-                'Diagnostic Methods',
-                style: AppStyles.headline2.copyWith(
-                  color: AppColors.titleColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: () => _showAllMethods(context),
-                icon: const Icon(Icons.tune, size: 18),
-                label: const Text('Customize'),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF3B82F6),
-                ),
-              ),
-            ],
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'diagnostic_methods'.tr(),
+            style: AppStyles.headline2.copyWith(
+              color: AppColors.titleColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        SizedBox(
-          height: 280,
-          child: PageView(
-            controller: PageController(viewportFraction: 0.85),
-            physics: const BouncingScrollPhysics(),
-            children: [
-              _buildModernDiagnosticCard(
-                context,
-                title: 'Dashboard Light Scan',
-                subtitle: 'Instant Warning Light Analysis',
-                description:
-                    'AI-powered identification of dashboard warning lights with detailed explanations.',
-                icon: Icons.dashboard_customize,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-                ),
-                onTap: () => _navigateToPage(
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 280,
+            child: PageView(
+              controller: PageController(viewportFraction: 0.85),
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _buildModernDiagnosticCard(
                   context,
-                  const DashboardLightScanningPage(),
+                  title: 'dashboard_light_scan'.tr(),
+                  subtitle: 'instant_warning_analysis'.tr(),
+                  description: 'ai_dashboard_description'.tr(),
+                  icon: Icons.dashboard_customize,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                  ),
+                  onTap: () => _navigateToPage(
+                    context,
+                    const DashboardLightScanningPage(),
+                  ),
                 ),
-              ),
-              _buildModernDiagnosticCard(
-                context,
-                title: 'Engine Sound Analysis',
-                subtitle: 'Advanced Audio Diagnostics',
-                description:
-                    'Machine learning algorithms analyze engine sounds to detect potential mechanical issues.',
-                icon: Icons.graphic_eq,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
+                _buildModernDiagnosticCard(
+                  context,
+                  title: 'engine_sound_analysis'.tr(),
+                  subtitle: 'advanced_audio_diagnostics'.tr(),
+                  description: 'engine_sound_description'.tr(),
+                  icon: Icons.graphic_eq,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
+                  ),
+                  onTap: () =>
+                      _navigateToPage(context, const EngineDiagnosisPage()),
                 ),
-                onTap: () =>
-                    _navigateToPage(context, const EngineDiagnosisPage()),
-              ),
-              _buildModernDiagnosticCard(
-                context,
-                title: 'Manual Inspection',
-                subtitle: 'Guided Visual Check',
-                description:
-                    'Step-by-step visual inspection guide with AI assistance .',
-                icon: Icons.search,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFF6B6B), Color(0xFFFFE66D)],
+                _buildModernDiagnosticCard(
+                  context,
+                  title: 'manual_inspection'.tr(),
+                  subtitle: 'guided_visual_check'.tr(),
+                  description: 'manual_inspection_description'.tr(),
+                  icon: Icons.search,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF6B6B), Color(0xFFFFE66D)],
+                  ),
+                  onTap: () =>
+                      _navigateToPage(context, const ManualFaultEntryPage()),
                 ),
-                onTap: () =>
-                    _navigateToPage(context, const ManualFaultEntryPage()),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -427,126 +245,76 @@ class _AnalysisPageState extends State<AnalysisPage>
     required String subtitle,
     required String description,
     required IconData icon,
-    required Gradient gradient,
+    required LinearGradient gradient,
     required VoidCallback onTap,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
+      margin: const EdgeInsets.only(right: 16),
       child: Material(
-        color: Colors.transparent,
+        elevation: 8,
+        borderRadius: BorderRadius.circular(20),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           child: Container(
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: gradient,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: gradient.colors.first.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: Stack(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Background pattern
-                Positioned(
-                  right: -20,
-                  top: -20,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 32),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                Positioned(
-                  right: 40,
-                  bottom: -30,
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
-                      shape: BoxShape.circle,
-                    ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                // Content
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Icon(icon, color: Colors.white, size: 20),
-                      ),
-                      const SizedBox(height: 15),
-                      Text(
-                        title,
-                        style: AppStyles.headline2.copyWith(
-                          color: AppColors.backgroundColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: AppStyles.bodyText.copyWith(
-                          color: AppColors.backgroundColor,
-                          fontSize: AppStyles.bodyText2.fontSize,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        description,
-                        style: AppStyles.bodyText.copyWith(
-                          color: AppColors.backgroundColor,
-                          fontSize: AppStyles.bodyText2.fontSize,
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          const Text(
-                            'Start Analysis',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.arrow_forward,
-                              color: Colors.white,
-                              size: 17,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                const SizedBox(height: 12),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    color: Colors.white60,
+                    fontSize: 12,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Spacer(),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_forward,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                 ),
               ],
@@ -559,16 +327,16 @@ class _AnalysisPageState extends State<AnalysisPage>
 
   Widget _buildSmartInsights(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 32, 20, 0),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -577,31 +345,24 @@ class _AnalysisPageState extends State<AnalysisPage>
         children: [
           Row(
             children: [
-              // Container(
-              //   padding: const EdgeInsets.all(12),
-              //   decoration: BoxDecoration(
-              //     color: const Color(0xFF3B82F6).withOpacity(0.1),
-              //     borderRadius: BorderRadius.circular(16),
-              //   ),
-              //   child: const Icon(
-              //     Icons.lightbulb_outline,
-              //     color: Color(0xFF3B82F6),
-              //     size: 24,
-              //   ),
-              // ),
-              // const SizedBox(width: 16),
+              Icon(
+                Icons.lightbulb_outline,
+                color: AppColors.primaryColor,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Smart Recommendations',
-                    style: AppStyles.headline2.copyWith(
+                    'smart_insights'.tr(),
+                    style: AppStyles.headline3.copyWith(
                       color: AppColors.titleColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    'AI-powered suggestions',
+                    'ai_powered_suggestions'.tr(),
                     style: AppStyles.bodyText.copyWith(
                       color: AppColors.greyTextColor,
                       fontSize: AppStyles.bodyText1.fontSize,
@@ -613,20 +374,20 @@ class _AnalysisPageState extends State<AnalysisPage>
           ),
           const SizedBox(height: 20),
           _buildInsightItem(
-            'Start with Dashboard Scan',
-            'Recommended if warning lights are active',
+            'start_dashboard_scan'.tr(),
+            'dashboard_scan_recommendation'.tr(),
             Icons.priority_high,
             Colors.amber,
           ),
           _buildInsightItem(
-            'Try Engine Sound Analysis',
-            'Perfect for unusual noises or performance issues',
+            'try_engine_analysis'.tr(),
+            'engine_analysis_recommendation'.tr(),
             Icons.hearing,
             Colors.green,
           ),
           _buildInsightItem(
-            'Schedule Preventive Check',
-            'Your next service is due in 45 days',
+            'schedule_preventive_check'.tr(),
+            'preventive_check_reminder'.tr(),
             Icons.event_available,
             Colors.blue,
           ),
@@ -635,46 +396,42 @@ class _AnalysisPageState extends State<AnalysisPage>
     );
   }
 
-  Widget _buildInsightItem(
-    String title,
-    String subtitle,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildInsightItem(String title, String subtitle, IconData icon, Color color) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.1)),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+              color: color,
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: Colors.white, size: 16),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: AppStyles.bodyText1.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: AppColors.textColor,
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: AppStyles.bodyText2.copyWith(
+                    color: AppColors.greyTextColor,
+                  ),
                 ),
               ],
             ),
@@ -686,8 +443,8 @@ class _AnalysisPageState extends State<AnalysisPage>
 
   Widget _buildHealthDashboard(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -812,30 +569,7 @@ class _AnalysisPageState extends State<AnalysisPage>
   }
 
   // Helper methods
-  void _navigateToPage(BuildContext context, Widget page) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => page,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position:
-                Tween<Offset>(
-                  begin: const Offset(1.0, 0.0),
-                  end: Offset.zero,
-                ).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  ),
-                ),
-            child: child,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 300),
-      ),
-    );
-  }
+  // Removed duplicate and unused _navigateToPage method to fix naming conflict.
 
   void _showNotifications(BuildContext context) {
     showModalBottomSheet(
